@@ -9,17 +9,10 @@ namespace Generator.DotNetCore
     {
         public async Task GenerateAsync(GraphQLDocument schema, IGeneratorWriterFactory writerFactory)
         {
-            using (var writer = await writerFactory.CreateAsync("null-type-1"))
+            using (var writer = await writerFactory.CreateAsync("schema"))
             {
-                await writer.WriteAsync("null-code-1-1");
-                await writer.WriteAsync("null-code-1-2");
-            }
-
-            using (var writer = await writerFactory.CreateAsync("null-type-2"))
-            {
-                await writer.WriteAsync("null-code-2-1");
-                await writer.WriteAsync("null-code-2-2");
-                await writer.WriteAsync("null-code-2-3");
+                var generatorWriter = new GeneratorWriter(writer);
+                await generatorWriter.GenerateAsync(schema.Definitions);
             }
         }
     }

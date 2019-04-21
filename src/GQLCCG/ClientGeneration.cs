@@ -78,6 +78,24 @@ type Mutation {
             }
         }
 
+        private class SimpleSchemaDataLoaderStub : ISchemaDataLoader
+        {
+            public Task<string> LoadSchemaDataAsync()
+            {
+                return Task.FromResult(@"
+
+query {
+    user (id: 22) {
+        id
+        email
+        name
+    }
+}
+
+");
+            }
+        }
+
 
         public static async Task GenerateClientAsync(ConsoleOptions options)
         {
@@ -87,7 +105,7 @@ type Mutation {
             var writer = new TextGeneratorWriterFactory(Console.Out);
 
             // TODO: remove stubs
-            var schemaDataLoader = new SchemaDataLoaderStub();
+            var schemaDataLoader = new SimpleSchemaDataLoaderStub();
 
             var processor = new GenerationProcessor(storage, schemaDataLoader, schemaParser, writer);
             await processor.ProcessAsync(options.GeneratorName);
