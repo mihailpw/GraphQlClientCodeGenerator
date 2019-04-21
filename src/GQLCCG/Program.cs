@@ -3,17 +3,24 @@ using CommandLine;
 
 namespace GQLCCG
 {
-    internal class Program
+    internal static class Program
     {
         public static void Main(string[] args)
         {
-            Parser.Default.ParseArguments<ConsoleOptions>(args)
+            var parser = new Parser(o =>
+            {
+                o.AutoHelp = false;
+                o.AutoVersion = false;
+            });
+
+            parser.ParseArguments<ConsoleOptions>(args)
                 .WithParsed(GenerateClient);
 
             Console.WriteLine();
             Console.Write("Execution finished. Press <enter> to exit...");
             Console.ReadLine();
         }
+
 
         private static void GenerateClient(ConsoleOptions options)
         {

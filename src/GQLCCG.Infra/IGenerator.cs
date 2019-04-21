@@ -1,9 +1,10 @@
 ﻿using System.Threading.Tasks;
+using GraphQLParser.AST;
 
 namespace GQLCCG.Infra
 {
     public interface IGenerator
     {
-        Task GenerateAsync(SchemaModel schema, IGeneratorWriter writer);
+        Task GenerateAsync(GraphQLDocument schema, IGeneratorWriter writer);
     }
 }
