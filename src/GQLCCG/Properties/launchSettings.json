@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "GQLCCG": {
+      "commandName": "Project",
+      "commandLineArgs": "-n dotnetcore"
+    }
+  }
+}
