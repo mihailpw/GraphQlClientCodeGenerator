@@ -8,3 +8,4 @@ bld/
 [Ll]og/
 out/
 .vs/
+*.user

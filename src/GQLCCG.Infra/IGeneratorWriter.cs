@@ -1,9 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace GQLCCG.Infra
 {
-    public interface IGeneratorWriter
+    public interface IGeneratorWriter : IDisposable
     {
-        Task WriteAsync(string type, string code);
+        Task WriteAsync(string code);
     }
 }

@@ -5,6 +5,6 @@ namespace GQLCCG.Infra
 {
     public interface IGenerator
     {
-        Task GenerateAsync(GraphQLDocument schema, IGeneratorWriter writer);
+        Task GenerateAsync(GraphQLDocument schema, IGeneratorWriterFactory writerFactory);
     }
 }

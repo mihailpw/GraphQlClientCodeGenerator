@@ -11,19 +11,19 @@ namespace GQLCCG.Processor
         private readonly IGeneratorStore _generatorStore;
         private readonly ISchemaDataLoader _schemaDataLoader;
         private readonly ISchemaParser _schemaParser;
-        private readonly IGeneratorWriter _generatorWriter;
+        private readonly IGeneratorWriterFactory _generatorWriterFactory;
 
 
         public GenerationProcessor(
             IGeneratorStore generatorStore,
             ISchemaDataLoader schemaDataLoader,
             ISchemaParser schemaParser,
-            IGeneratorWriter generatorWriter)
+            IGeneratorWriterFactory generatorWriterFactory)
         {
             _generatorStore = generatorStore.VerifyNotNull(nameof(generatorStore));
             _schemaDataLoader = schemaDataLoader.VerifyNotNull(nameof(schemaDataLoader));
             _schemaParser = schemaParser.VerifyNotNull(nameof(schemaParser));
-            _generatorWriter = generatorWriter.VerifyNotNull(nameof(generatorWriter));
+            _generatorWriterFactory = generatorWriterFactory.VerifyNotNull(nameof(generatorWriterFactory));
         }
 
 
@@ -32,7 +32,7 @@ namespace GQLCCG.Processor
             var generator = _generatorStore.GetGenerator(generatorName);
             var schemaData = await _schemaDataLoader.LoadSchemaDataAsync();
             var schema = _schemaParser.Parse(schemaData);
-            await generator.GenerateAsync(schema, _generatorWriter);
+            await generator.GenerateAsync(schema, _generatorWriterFactory);
         }
     }
 }

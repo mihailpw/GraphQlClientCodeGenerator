@@ -84,7 +84,7 @@ type Mutation {
             var storage = new FromDirGeneratorStore(options.PluginsDirPath);
             // var schemaDataLoader = new FromUrlSchemaDataLoader(options.SchemaUri);
             var schemaParser = new LexerGraphQlSchemaParser();
-            var writer = new TextGeneratorWriter(Console.Out);
+            var writer = new TextGeneratorWriterFactory(Console.Out);
 
             // TODO: remove stubs
             var schemaDataLoader = new SchemaDataLoaderStub();
