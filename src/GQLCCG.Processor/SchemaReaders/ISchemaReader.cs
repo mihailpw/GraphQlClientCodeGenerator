@@ -3,7 +3,7 @@ using GQLCCG.Infra.Models;
 
 namespace GQLCCG.Processor.SchemaReaders
 {
-    public interface ISchemaLoader
+    public interface ISchemaReader
     {
         Task<GraphQlSchema> LoadSchemaDataAsync();
     }

@@ -13,7 +13,7 @@ namespace GQLCCG
         public static async Task GenerateClientAsync(ConsoleOptions options)
         {
             var storage = new FromDirGeneratorStore(options.PluginsDirPath);
-            var schemaLoader = new FromUrlSchemaLoader(options.SchemaUri);
+            var schemaLoader = new FromUrlSchemaReader(options.SchemaUri);
             var writer = new TextGeneratorWriterFactory(Console.Out);
 
             var processor = new GenerationProcessor(storage, schemaLoader, writer);
