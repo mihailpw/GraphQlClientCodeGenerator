@@ -4,7 +4,6 @@ using System.Text;
 using System.Threading.Tasks;
 using GQLCCG.Infra.Models;
 using GQLCCG.Infra.Utils;
-using GQLCCG.Processor.Core;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -25,7 +24,7 @@ namespace GQLCCG.Processor.SchemaReaders
         {
             using (var client = new HttpClient())
             {
-                using (var response = await client.PostAsync(_uri, new StringContent(JsonConvert.SerializeObject(new { query = GraphQlJsonDto.RetrieveSchemaQuery }), Encoding.UTF8, "application/json")))
+                using (var response = await client.PostAsync(_uri, new StringContent(JsonConvert.SerializeObject(new { query = GraphQlJsonDto.RetrieveSchemaQuery(4) }), Encoding.UTF8, "application/json")))
                 {
                     var content = response.Content != null
                         ? await response.Content.ReadAsStringAsync()
@@ -41,7 +40,9 @@ namespace GQLCCG.Processor.SchemaReaders
                         var jObject = (JObject) JsonConvert.DeserializeObject(content);
                         var schemeJObject = jObject["data"]["__schema"];
                         var dto = schemeJObject.ToObject<GraphQlJsonDto.Schema>();
-                        var schema = ConvertFromDto(dto);
+
+                        var convertCommand = new ConvertGraphQlJsonDtoToModelCommand();
+                        var schema = convertCommand.Execute(dto);
 
                         return schema;
                     }
@@ -51,12 +52,6 @@ namespace GQLCCG.Processor.SchemaReaders
                     }
                 }
             }
-        }
-
-
-        private static GraphQlSchema ConvertFromDto(GraphQlJsonDto.Schema dto)
-        {
-            return new GraphQlSchema();
         }
     }
 }

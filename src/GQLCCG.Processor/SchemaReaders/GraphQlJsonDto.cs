@@ -4,7 +4,108 @@ namespace GQLCCG.Processor.SchemaReaders
 {
     internal class GraphQlJsonDto
     {
-        public const string RetrieveSchemaQuery = @"query IntrospectionQuery { __schema { queryType { name } mutationType { name } subscriptionType { name } types { ...FullType } } } fragment ShortType on __Type { kind name ofType { kind name ofType { kind name ofType { kind name } } } } fragment FullType on __Type { kind name description fields(includeDeprecated: true) { ...Field } inputFields { ...InputValue } interfaces { ...ShortType } enumValues(includeDeprecated: true) { ...EnumValue } possibleTypes { ...ShortType } } fragment Field on __Field { name description args { ...InputValue } type { ...ShortType } isDeprecated deprecationReason } fragment InputValue on __InputValue { name description type { ...ShortType } defaultValue } fragment EnumValue on __EnumValue { name description isDeprecated deprecationReason }";
+        public static string RetrieveSchemaQuery(int innerLevelOfType)
+        {
+            string WrapShortTypeRequest()
+            {
+                const string ofTypeRequest = @"
+ofType {{
+  kind
+  name
+  {0}
+}}";
+                var result = string.Empty;
+
+                for (var i = 0; i < innerLevelOfType - 1; i++)
+                {
+                    result = string.Format(ofTypeRequest, result);
+                }
+
+                return result;
+            }
+
+            var shortType = WrapShortTypeRequest();
+
+            var request = @"
+query IntrospectionQuery {
+  __schema {
+    queryType {
+      name
+    }
+    mutationType {
+      name
+    }
+    subscriptionType {
+      name
+    }
+    types {
+      ...FullType
+    }
+  }
+}
+
+fragment ShortType on __Type {
+  kind
+  name
+  " + shortType + @"
+}
+
+fragment FullType on __Type {
+  kind
+  name
+  description
+  ofType {
+    ...ShortType
+  }
+  fields(includeDeprecated: true) {
+    ...Field
+  }
+  inputFields {
+    ...InputValue
+  }
+  interfaces {
+    ...ShortType
+  }
+  enumValues(includeDeprecated: true) {
+    ...EnumValue
+  }
+  possibleTypes {
+    ...ShortType
+  }
+}
+
+fragment Field on __Field {
+  name
+  description
+  args {
+    ...InputValue
+  }
+  type {
+    ...ShortType
+  }
+  isDeprecated
+  deprecationReason
+}
+
+fragment InputValue on __InputValue {
+  name
+  description
+  type {
+    ...ShortType
+  }
+  defaultValue
+}
+
+fragment EnumValue on __EnumValue {
+  name
+  description
+  isDeprecated
+  deprecationReason
+}
+";
+
+            return request;
+        }
 
 
 
@@ -20,6 +121,7 @@ namespace GQLCCG.Processor.SchemaReaders
         {
             public string Kind { get; set; }
             public string Name { get; set; }
+            public string Description { get; set; }
             public ShortType OfType { get; set; }
         }
 

@@ -1,15 +1,29 @@
 ﻿using System.Collections.Generic;
+using GQLCCG.Infra.Models.Types;
 
 namespace GQLCCG.Infra.Models
 {
     public class GraphQlSchema
     {
-        public GraphQlType QueryType { get; set; }
+        public GraphQlObjectType QueryType { get; }
 
-        public GraphQlType MutationType { get; set; }
+        public GraphQlObjectType MutationType { get; }
 
-        public GraphQlType SubscriptionType { get; set; }
+        public GraphQlObjectType SubscriptionType { get; }
 
-        public List<GraphQlType> Types { get; set; }
+        public IReadOnlyList<GraphQlTypeBase> Types { get; }
+
+
+        public GraphQlSchema(
+            GraphQlObjectType queryType,
+            GraphQlObjectType mutationType,
+            GraphQlObjectType subscriptionType,
+            IReadOnlyList<GraphQlTypeBase> types)
+        {
+            QueryType = queryType;
+            MutationType = mutationType;
+            SubscriptionType = subscriptionType;
+            Types = types;
+        }
     }
 }
