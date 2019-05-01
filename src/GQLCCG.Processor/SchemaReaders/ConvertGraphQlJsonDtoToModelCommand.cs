@@ -29,39 +29,43 @@ namespace GQLCCG.Processor.SchemaReaders
         }
 
 
-        private static IEnumerable<GraphQlTypeBase> ConvertToTypesWithRefs(IEnumerable<GraphQlJsonDto.FullType> types)
+        private static IEnumerable<GraphQlTypeBase> ConvertToTypesWithRefs(IEnumerable<GraphQlJsonDto.Type> types)
         {
-            GraphQlTypeBase ConvertToTypeRef(GraphQlJsonDto.ShortType shortType)
+            GraphQlTypeBase ConvertToTypeRef(GraphQlJsonDto.TypeRef shortType)
             {
                 switch (shortType.Kind)
                 {
                     case "LIST":
-                        return new GraphQlListType(
-                            shortType.Name,
-                            shortType.Description,
-                            ConvertToTypeRef(shortType.OfType));
+                        return new GraphQlListType
+                        {
+                            Name = shortType.Name,
+                            Description = shortType.Description,
+                            OfType = ConvertToTypeRef(shortType.OfType),
+                        };
                     case "NON_NULL":
-                        return new GraphQlNonNullType(
-                            shortType.Name,
-                            shortType.Description,
-                            ConvertToTypeRef(shortType.OfType));
+                        return new GraphQlNonNullType
+                        {
+                            Name = shortType.Name,
+                            Description = shortType.Description,
+                            OfType = ConvertToTypeRef(shortType.OfType),
+                        };
                     default:
                         return new TypeRef(shortType.Name);
                 }
 
             }
-            IReadOnlyList<GraphQlTypeBase> ConvertToTypeRefs(IEnumerable<GraphQlJsonDto.ShortType> shortTypes)
+            IList<GraphQlTypeBase> ConvertToTypeRefs(IEnumerable<GraphQlJsonDto.TypeRef> shortTypes)
             {
                 if (shortTypes == null)
                 {
-                    return Array.Empty<GraphQlObjectType>();
+                    return Array.Empty<GraphQlTypeBase>();
                 }
 
                 return shortTypes
                     .Select(ConvertToTypeRef)
                     .ToList();
             }
-            IReadOnlyList<GraphQlInputValue> ConvertToInputValues(IEnumerable<GraphQlJsonDto.InputValue> inputValues)
+            IList<GraphQlInputValue> ConvertToInputValues(IEnumerable<GraphQlJsonDto.InputValue> inputValues)
             {
                 if (inputValues == null)
                 {
@@ -69,14 +73,16 @@ namespace GQLCCG.Processor.SchemaReaders
                 }
 
                 return inputValues
-                    .Select(f => new GraphQlInputValue(
-                        f.Name,
-                        f.Description,
-                        ConvertToTypeRef(f.Type),
-                        f.DefaultValue))
+                    .Select(f => new GraphQlInputValue
+                    {
+                        Name = f.Name,
+                        Description = f.Description,
+                        Type = ConvertToTypeRef(f.Type),
+                        DefaultValue = f.DefaultValue,
+                    })
                     .ToList();
             }
-            IReadOnlyList<GraphQlField> ConvertToFields(IEnumerable<GraphQlJsonDto.Field> fields)
+            IList<GraphQlField> ConvertToFields(IEnumerable<GraphQlJsonDto.Field> fields)
             {
                 if (fields == null)
                 {
@@ -84,16 +90,18 @@ namespace GQLCCG.Processor.SchemaReaders
                 }
 
                 return fields
-                    .Select(f => new GraphQlField(
-                        f.Name,
-                        f.Description,
-                        f.IsDeprecated,
-                        f.DeprecationReason,
-                        ConvertToTypeRef(f.Type),
-                        ConvertToInputValues(f.Args)))
+                    .Select(f => new GraphQlField
+                    {
+                        Name = f.Name,
+                        Description = f.Description,
+                        IsDeprecated = f.IsDeprecated,
+                        DeprecationReason = f.DeprecationReason,
+                        Type = ConvertToTypeRef(f.Type),
+                        Args = ConvertToInputValues(f.Args),
+                    })
                     .ToList();
             }
-            IReadOnlyList<GraphQlEnumValue> ConvertToEnumValues(IEnumerable<GraphQlJsonDto.EnumValue> fields)
+            IList<GraphQlEnumValue> ConvertToEnumValues(IEnumerable<GraphQlJsonDto.EnumValue> fields)
             {
                 if (fields == null)
                 {
@@ -101,17 +109,19 @@ namespace GQLCCG.Processor.SchemaReaders
                 }
 
                 return fields
-                    .Select(f => new GraphQlEnumValue(
-                        f.Name,
-                        f.Description,
-                        f.IsDeprecated,
-                        f.DeprecationReason))
+                    .Select(f => new GraphQlEnumValue
+                    {
+                        Name = f.Name,
+                        Description = f.Description,
+                        IsDeprecated = f.IsDeprecated,
+                        DeprecationReason = f.DeprecationReason,
+                    })
                     .ToList();
             }
 
             foreach (var type in types)
             {
-                if (type.Name.StartsWith("__"))
+                if (CheckIfSystemType(type))
                 {
                     continue;
                 }
@@ -120,42 +130,54 @@ namespace GQLCCG.Processor.SchemaReaders
                 {
                     case "SCALAR":
                         var scalarType = (ScalarTypes) Enum.Parse(typeof(ScalarTypes), type.Name, true);
-                        yield return new GraphQlScalarType(
-                            name: type.Name,
-                            description: type.Description,
-                            type: scalarType);
+                        yield return new GraphQlScalarType
+                        {
+                            Name = type.Name,
+                            Description = type.Description,
+                            Type = scalarType,
+                        };
                         break;
                     case "OBJECT":
-                        yield return new GraphQlObjectType(
-                            name: type.Name,
-                            description: type.Description,
-                            fields: ConvertToFields(type.Fields),
-                            possibleTypes: ConvertToTypeRefs(type.PossibleTypes));
+                        yield return new GraphQlObjectType
+                        {
+                            Name = type.Name,
+                            Description = type.Description,
+                            Fields = ConvertToFields(type.Fields),
+                            PossibleTypes = ConvertToTypeRefs(type.PossibleTypes),
+                        };
                         break;
                     case "INTERFACE":
-                        yield return new GraphQlInterfaceType(
-                            name: type.Name,
-                            description: type.Description,
-                            fields: ConvertToFields(type.Fields),
-                            possibleTypes: ConvertToTypeRefs(type.PossibleTypes));
+                        yield return new GraphQlInterfaceType
+                        {
+                            Name = type.Name,
+                            Description = type.Description,
+                            Fields = ConvertToFields(type.Fields),
+                            PossibleTypes = ConvertToTypeRefs(type.PossibleTypes),
+                        };
                         break;
                     case "UNION":
-                        yield return new GraphQlUnionType(
-                            name: type.Name,
-                            description: type.Description,
-                            possibleTypes: ConvertToTypeRefs(type.PossibleTypes));
+                        yield return new GraphQlUnionType
+                        {
+                            Name = type.Name,
+                            Description = type.Description,
+                            PossibleTypes = ConvertToTypeRefs(type.PossibleTypes),
+                        };
                         break;
                     case "ENUM":
-                        yield return new GraphQlEnumType(
-                            name: type.Name,
-                            description: type.Description,
-                            enumValues: ConvertToEnumValues(type.EnumValues));
+                        yield return new GraphQlEnumType
+                        {
+                            Name = type.Name,
+                            Description = type.Description,
+                            EnumValues = ConvertToEnumValues(type.EnumValues),
+                        };
                         break;
                     case "INPUT_OBJECT":
-                        yield return new GraphQlInputObjectType(
-                            name: type.Name,
-                            description: type.Description,
-                            inputFields: ConvertToInputValues(type.InputFields));
+                        yield return new GraphQlInputObjectType
+                        {
+                            Name = type.Name,
+                            Description = type.Description,
+                            InputFields = ConvertToInputValues(type.InputFields),
+                        };
                         break;
                     case "LIST":
                     case "NON_NULL":
@@ -166,9 +188,9 @@ namespace GQLCCG.Processor.SchemaReaders
             }
         }
 
-        private static void PopulateTypesWithRefs(List<GraphQlTypeBase> types)
+        private static void PopulateTypesWithRefs(IReadOnlyCollection<GraphQlTypeBase> types)
         {
-            IReadOnlyList<GraphQlTypeBase> LockupList(IEnumerable<GraphQlTypeBase> typeBases)
+            IList<GraphQlTypeBase> LockupList(IEnumerable<GraphQlTypeBase> typeBases)
             {
                 return typeBases.Select(Lockup).ToList();
             }
@@ -239,14 +261,19 @@ namespace GQLCCG.Processor.SchemaReaders
             }
         }
 
-        private static GraphQlObjectType SelectObjectType(GraphQlJsonDto.ShortType type, List<GraphQlTypeBase> types)
+        private static GraphQlObjectType SelectObjectType(GraphQlJsonDto.TypeRef typeRef, IEnumerable<GraphQlTypeBase> types)
         {
-            if (type == null)
+            if (typeRef == null)
             {
                 return null;
             }
 
-            return (GraphQlObjectType) types.Single(t => t.Name == type.Name);
+            return (GraphQlObjectType) types.Single(t => t.Name == typeRef.Name);
+        }
+
+        private static bool CheckIfSystemType(GraphQlJsonDto.Type type)
+        {
+            return type.Name.StartsWith("__");
         }
 
 
@@ -254,8 +281,8 @@ namespace GQLCCG.Processor.SchemaReaders
         private class TypeRef : GraphQlTypeBase
         {
             public TypeRef(string name)
-                : base(name, null)
             {
+                Name = name;
             }
         }
     }

@@ -4,20 +4,8 @@ namespace GQLCCG.Infra.Models.Objects
 {
     public class GraphQlInputValue : GraphQlEntityBase
     {
-        public GraphQlTypeBase Type { get; internal set; }
+        public GraphQlTypeBase Type { get; set; }
 
-        public string DefaultValue { get; }
-
-
-        public GraphQlInputValue(
-            string name,
-            string description,
-            GraphQlTypeBase type,
-            string defaultValue)
-            : base(name, description)
-        {
-            Type = type;
-            DefaultValue = defaultValue;
-        }
+        public string DefaultValue { get; set; }
     }
 }

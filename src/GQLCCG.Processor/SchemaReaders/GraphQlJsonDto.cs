@@ -6,7 +6,7 @@ namespace GQLCCG.Processor.SchemaReaders
     {
         public static string RetrieveSchemaQuery(int innerLevelOfType)
         {
-            string WrapShortTypeRequest()
+            string WrapTypeRefRequest()
             {
                 const string ofTypeRequest = @"
 ofType {{
@@ -24,7 +24,7 @@ ofType {{
                 return result;
             }
 
-            var shortType = WrapShortTypeRequest();
+            var shortType = WrapTypeRefRequest();
 
             var request = @"
 query IntrospectionQuery {
@@ -39,23 +39,23 @@ query IntrospectionQuery {
       name
     }
     types {
-      ...FullType
+      ...Type
     }
   }
 }
 
-fragment ShortType on __Type {
+fragment TypeRef on __Type {
   kind
   name
   " + shortType + @"
 }
 
-fragment FullType on __Type {
+fragment Type on __Type {
   kind
   name
   description
   ofType {
-    ...ShortType
+    ...TypeRef
   }
   fields(includeDeprecated: true) {
     ...Field
@@ -64,13 +64,13 @@ fragment FullType on __Type {
     ...InputValue
   }
   interfaces {
-    ...ShortType
+    ...TypeRef
   }
   enumValues(includeDeprecated: true) {
     ...EnumValue
   }
   possibleTypes {
-    ...ShortType
+    ...TypeRef
   }
 }
 
@@ -81,7 +81,7 @@ fragment Field on __Field {
     ...InputValue
   }
   type {
-    ...ShortType
+    ...TypeRef
   }
   isDeprecated
   deprecationReason
@@ -91,7 +91,7 @@ fragment InputValue on __InputValue {
   name
   description
   type {
-    ...ShortType
+    ...TypeRef
   }
   defaultValue
 }
@@ -111,30 +111,30 @@ fragment EnumValue on __EnumValue {
 
         public class Schema
         {
-            public ShortType QueryType { get; set; }
-            public ShortType MutationType { get; set; }
-            public ShortType SubscriptionType { get; set; }
-            public List<FullType> Types { get; set; }
+            public TypeRef QueryType { get; set; }
+            public TypeRef MutationType { get; set; }
+            public TypeRef SubscriptionType { get; set; }
+            public List<Type> Types { get; set; }
         }
 
-        public class ShortType
+        public class TypeRef
         {
             public string Kind { get; set; }
             public string Name { get; set; }
             public string Description { get; set; }
-            public ShortType OfType { get; set; }
+            public TypeRef OfType { get; set; }
         }
 
-        public class FullType
+        public class Type
         {
             public string Kind { get; set; }
             public string Name { get; set; }
             public string Description { get; set; }
             public List<Field> Fields { get; set; }
             public List<InputValue> InputFields { get; set; }
-            public List<ShortType> Interfaces { get; set; }
+            public List<TypeRef> Interfaces { get; set; }
             public List<EnumValue> EnumValues { get; set; }
-            public List<ShortType> PossibleTypes { get; set; }
+            public List<TypeRef> PossibleTypes { get; set; }
         }
 
         public class Field
@@ -142,7 +142,7 @@ fragment EnumValue on __EnumValue {
             public string Name { get; set; }
             public string Description { get; set; }
             public List<InputValue> Args { get; set; }
-            public ShortType Type { get; set; }
+            public TypeRef Type { get; set; }
             public bool IsDeprecated { get; set; }
             public string DeprecationReason { get; set; }
         }
@@ -151,7 +151,7 @@ fragment EnumValue on __EnumValue {
         {
             public string Name { get; set; }
             public string Description { get; set; }
-            public ShortType Type { get; set; }
+            public TypeRef Type { get; set; }
             public string DefaultValue { get; set; }
         }
 

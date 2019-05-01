@@ -5,13 +5,13 @@ namespace GQLCCG.Infra.Models
 {
     public class GraphQlSchema
     {
-        public GraphQlObjectType QueryType { get; }
+        public GraphQlObjectType QueryType { get; set; }
 
-        public GraphQlObjectType MutationType { get; }
+        public GraphQlObjectType MutationType { get; set; }
 
-        public GraphQlObjectType SubscriptionType { get; }
+        public GraphQlObjectType SubscriptionType { get; set; }
 
-        public IReadOnlyList<GraphQlTypeBase> Types { get; }
+        public IReadOnlyList<GraphQlTypeBase> Types { get; set; }
 
 
         public GraphQlSchema(

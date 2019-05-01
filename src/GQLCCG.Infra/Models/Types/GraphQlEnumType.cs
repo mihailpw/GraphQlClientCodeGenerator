@@ -5,16 +5,6 @@ namespace GQLCCG.Infra.Models.Types
 {
     public class GraphQlEnumType : GraphQlTypeBase
     {
-        public IReadOnlyList<GraphQlEnumValue> EnumValues { get; }
-
-
-        public GraphQlEnumType(
-            string name,
-            string description,
-            IReadOnlyList<GraphQlEnumValue> enumValues)
-            : base(name, description)
-        {
-            EnumValues = enumValues;
-        }
+        public IList<GraphQlEnumValue> EnumValues { get; set; }
     }
 }

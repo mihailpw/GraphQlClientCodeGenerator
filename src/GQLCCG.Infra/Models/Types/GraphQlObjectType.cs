@@ -5,20 +5,8 @@ namespace GQLCCG.Infra.Models.Types
 {
     public class GraphQlObjectType : GraphQlTypeBase
     {
-        public IReadOnlyList<GraphQlField> Fields { get; }
+        public IList<GraphQlField> Fields { get; set; }
 
-        public IReadOnlyList<GraphQlTypeBase> PossibleTypes { get; internal set; }
-
-
-        public GraphQlObjectType(
-            string name,
-            string description,
-            IReadOnlyList<GraphQlField> fields,
-            IReadOnlyList<GraphQlTypeBase> possibleTypes)
-            : base(name, description)
-        {
-            Fields = fields;
-            PossibleTypes = possibleTypes;
-        }
+        public IList<GraphQlTypeBase> PossibleTypes { get; set; }
     }
 }

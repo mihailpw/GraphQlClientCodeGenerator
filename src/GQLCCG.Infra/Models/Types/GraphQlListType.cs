@@ -2,16 +2,6 @@
 {
     public class GraphQlListType : GraphQlTypeBase
     {
-        public GraphQlTypeBase OfType { get; internal set; }
-
-
-        public GraphQlListType(
-            string name,
-            string description,
-            GraphQlTypeBase ofType)
-            : base(name, description)
-        {
-            OfType = ofType;
-        }
+        public GraphQlTypeBase OfType { get; set; }
     }
 }

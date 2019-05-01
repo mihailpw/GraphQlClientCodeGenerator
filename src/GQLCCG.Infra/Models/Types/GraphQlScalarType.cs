@@ -2,17 +2,7 @@
 {
     public class GraphQlScalarType : GraphQlTypeBase
     {
-        public ScalarTypes Type { get; }
-
-
-        public GraphQlScalarType(
-            string name,
-            string description,
-            ScalarTypes type)
-            : base(name, description)
-        {
-            Type = type;
-        }
+        public ScalarTypes Type { get; set; }
     }
 
     public enum ScalarTypes

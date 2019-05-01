@@ -1,5 +1,4 @@
-﻿using System.IO;
-using CommandLine;
+﻿using CommandLine;
 
 namespace GQLCCG
 {
@@ -9,9 +8,9 @@ namespace GQLCCG
         public string GeneratorName { get; set; }
 
         [Option('u', "schema-uri", Required = true, HelpText = "Schema uri.")]
-        public string SchemaUri { get; set; } = Directory.GetCurrentDirectory();
+        public string SchemaUri { get; set; }
 
-        [Option("plugins-dir", Required = false, HelpText = "Plugins directory path.")]
-        public string PluginsDirPath { get; set; } = Directory.GetCurrentDirectory();
+        [Option("inner-level-oftype", Required = false, HelpText = "Inner level of search in type ref.", Default = 4)]
+        public int InnerLevelOfType { get; set; }
     }
 }
