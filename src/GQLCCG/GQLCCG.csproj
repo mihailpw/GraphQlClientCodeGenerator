@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -11,6 +11,9 @@
 
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.4.3" />
+
+    <!-- TODO remove Handlebars.Net -->
+    <PackageReference Include="Handlebars.Net" Version="1.10.1" />
   </ItemGroup>
 
   <ItemGroup>
