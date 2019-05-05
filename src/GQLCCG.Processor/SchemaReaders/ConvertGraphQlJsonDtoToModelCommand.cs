@@ -280,6 +280,9 @@ namespace GQLCCG.Processor.SchemaReaders
 
         private class TypeRef : GraphQlTypeBase
         {
+            public override GraphQlKind Kind => 0;
+
+
             public TypeRef(string name)
             {
                 Name = name;

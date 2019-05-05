@@ -5,101 +5,89 @@ namespace {{ namespace }}.Infra
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using GQL.Client.Infra;
     using GraphQL.Client;
     using GraphQL.Common.Request;
     using GraphQL.Common.Response;
     using Newtonsoft.Json.Linq;
 
+
     #region Client
 
     public class Response<T>
     {
-    private readonly T _data;
+        private readonly T _data;
 
 
-    public bool IsCompleted { get; }
+        public bool IsCompleted { get; }
 
-    public bool IsFailed => !IsCompleted;
+        public bool IsFailed => !IsCompleted;
 
-    public T Data
-    {
-    get
-    {
-    if (IsFailed)
-    {
-    throw new InvalidOperationException("Can not get data from failed response.");
-    }
+        public T Data
+        {
+            get
+            {
+                if (IsFailed)
+                {
+                    throw new InvalidOperationException("Can not get data from failed response.");
+                }
 
-    return _data;
-    }
-    }
+                return _data;
+            }
+        }
 
-    public IReadOnlyList<Error>
-        Errors { get; }
+        public IReadOnlyList<Error> Errors { get; }
 
 
         public Response(T data)
         {
-        _data = data;
+            _data = data;
 
-        IsCompleted = true;
-        Errors = Array.Empty<Error>
-            ();
+            IsCompleted = true;
+            Errors = Array.Empty<Error>();
+        }
+
+        public Response(IReadOnlyList<Error> errors)
+        {
+            Errors = errors;
+
+            IsCompleted = false;
+        }
+    }
+
+    public class Error
+    {
+        public string Message { get; }
+
+        public IReadOnlyList<Location> Locations { get; set; }
+
+        public IReadOnlyDictionary<string, object> AdditionalEntries { get; set; }
+
+
+        public Error(
+            string message,
+            IReadOnlyList<Location> locations,
+            IReadOnlyDictionary<string, object> additionalEntries)
+        {
+            Message = message;
+            Locations = locations;
+            AdditionalEntries = additionalEntries;
+        }
+
+
+
+        public class Location
+        {
+            public uint Column { get; }
+
+            public uint Line { get; }
+
+
+            public Location(uint column, uint line)
+            {
+                Column = column;
+                Line = line;
             }
-
-            public Response(IReadOnlyList<Error>
-                errors)
-                {
-                Errors = errors;
-
-                IsCompleted = false;
-                }
-                }
-
-                public class Error
-                {
-                public string Message { get; }
-
-                public IReadOnlyList<Location>
-                    Locations { get; set; }
-
-                    public IReadOnlyDictionary<string, object>
-                        AdditionalEntries { get; set; }
-
-
-                        public Error(
-                        string message,
-                        IReadOnlyList<Location>
-                            locations,
-                            IReadOnlyDictionary<string, object>
-                                additionalEntries)
-                                {
-                                Message = message;
-                                Locations = locations;
-                                AdditionalEntries = additionalEntries;
-                                }
-
-
-
-                                public class Location
-                                {
-                                public uint Column { get; }
-
-                                public uint Line { get; }
-
-
-                                public Location(uint column, uint line)
-                                {
-                                Column = column;
-                                Line = line;
-                                }
-                                }
-                                }
-
-                                public interface IGraphQlClient
-                                {
-                                Task<Response<TDto>> RequestAsync<TDto>();
+        }
     }
 
     public interface IGraphQlClient<T> : IGraphQlClient

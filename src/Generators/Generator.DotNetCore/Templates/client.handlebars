@@ -1,0 +1,42 @@
+namespace {{ namespace }}
+{
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using Infra;
+
+    #region Dtos
+
+{{#each schema.types }}
+    {{> dto }}
+
+{{/each}}
+    #endregion
+
+    #region Builders
+
+{{#each schema.types }}
+    {{> builder }}
+
+{{/each}}
+    #endregion
+
+    public class AppClientFactory
+    {
+        private readonly string _url;
+
+
+        public AppClientFactory(string url)
+        {
+            _url = url;
+        }
+
+
+        public ClientFactory<QueryDto> ForQuery(Action<QueryType> setupAction)
+        {
+            var type = new QueryType();
+            setupAction(type);
+            return new ClientFactory<QueryDto>(_url, "query", type);
+        }
+    }
+}

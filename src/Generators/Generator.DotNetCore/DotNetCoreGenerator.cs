@@ -14,7 +14,7 @@ namespace Generator.DotNetCore
             {
                 var generatorWriter = new GeneratorWriter(
                     new ResourcesTemplateReader(),
-                    new MustacheTemplateBuilder(),
+                    new HandlebarsTemplateBuilder(context),
                     writer);
 
                 await generatorWriter.GenerateAsync(schema, context);

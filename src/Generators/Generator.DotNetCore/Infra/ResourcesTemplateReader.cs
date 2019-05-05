@@ -7,7 +7,7 @@ namespace Generator.DotNetCore.Infra
 {
     public class ResourcesTemplateReader : ITemplateReader
     {
-        private const string TemplatesPathFormat = "Generator.DotNetCore.Templates.{0}";
+        private const string TemplatesPathFormat = "Generator.DotNetCore.Templates.{0}.handlebars";
 
         private readonly Assembly _assembly;
 

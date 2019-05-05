@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Generator.DotNetCore.Infra;
 using GQLCCG.Infra;
 using GQLCCG.Infra.Models;
@@ -22,13 +24,33 @@ namespace Generator.DotNetCore
 
         public async Task GenerateAsync(GraphQlSchema schema, GeneratorContext context)
         {
-            var infraTemplate = await _templateReader.ReadAsync("infra.mustache");
-            var infraView = await _templateBuilder.BuildAsync(infraTemplate, new
+            var infraTemplate = await _templateReader.ReadAsync("infra");
+            var infraView = await _templateBuilder.BuildAsync(
+                infraTemplate,
+                new
+                {
+                    @namespace = context.Namespace,
+                });
+
+            var dtoPartial = await _templateReader.ReadAsync("dto");
+            var builderPartial = await _templateReader.ReadAsync("builder");
+            var partials = new Dictionary<string, string>
             {
-                @namespace = "GeneratedClient",
-            });
+                ["dto"] = dtoPartial,
+                ["builder"] = builderPartial,
+            };
 
+            var clientTemplate = await _templateReader.ReadAsync("client");
+            var clientView = await _templateBuilder.BuildAsync(
+                clientTemplate,
+                new
+                {
+                    @namespace = context.Namespace,
+                    schema,
+                },
+                partials);
 
+            await _writer.WriteAsync(string.Join(Environment.NewLine, infraView, clientView));
         }
     }
 }
