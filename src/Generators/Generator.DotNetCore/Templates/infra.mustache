@@ -1,0 +1,447 @@
+namespace {{ namespace }}.Infra
+{
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using GQL.Client.Infra;
+    using GraphQL.Client;
+    using GraphQL.Common.Request;
+    using GraphQL.Common.Response;
+    using Newtonsoft.Json.Linq;
+
+    #region Client
+
+    public class Response<T>
+    {
+    private readonly T _data;
+
+
+    public bool IsCompleted { get; }
+
+    public bool IsFailed => !IsCompleted;
+
+    public T Data
+    {
+    get
+    {
+    if (IsFailed)
+    {
+    throw new InvalidOperationException("Can not get data from failed response.");
+    }
+
+    return _data;
+    }
+    }
+
+    public IReadOnlyList<Error>
+        Errors { get; }
+
+
+        public Response(T data)
+        {
+        _data = data;
+
+        IsCompleted = true;
+        Errors = Array.Empty<Error>
+            ();
+            }
+
+            public Response(IReadOnlyList<Error>
+                errors)
+                {
+                Errors = errors;
+
+                IsCompleted = false;
+                }
+                }
+
+                public class Error
+                {
+                public string Message { get; }
+
+                public IReadOnlyList<Location>
+                    Locations { get; set; }
+
+                    public IReadOnlyDictionary<string, object>
+                        AdditionalEntries { get; set; }
+
+
+                        public Error(
+                        string message,
+                        IReadOnlyList<Location>
+                            locations,
+                            IReadOnlyDictionary<string, object>
+                                additionalEntries)
+                                {
+                                Message = message;
+                                Locations = locations;
+                                AdditionalEntries = additionalEntries;
+                                }
+
+
+
+                                public class Location
+                                {
+                                public uint Column { get; }
+
+                                public uint Line { get; }
+
+
+                                public Location(uint column, uint line)
+                                {
+                                Column = column;
+                                Line = line;
+                                }
+                                }
+                                }
+
+                                public interface IGraphQlClient
+                                {
+                                Task<Response<TDto>> RequestAsync<TDto>();
+    }
+
+    public interface IGraphQlClient<T> : IGraphQlClient
+    {
+        Task<Response<T>> RequestAsync();
+    }
+
+    public class GraphQlClient : IGraphQlClient
+    {
+        private readonly bool _usePostResponse;
+
+        private readonly GraphQLClient _client;
+        private readonly GraphQLRequest _request;
+
+
+        public GraphQlClient(string url, string query, Dictionary<string, object> variables, bool usePostResponse)
+        {
+            _usePostResponse = usePostResponse;
+
+            _client = new GraphQLClient(url);
+            _request = new GraphQLRequest
+            {
+                Query = query,
+                Variables = variables,
+            };
+        }
+
+
+        public async Task<Response<TDto>> RequestAsync<TDto>()
+        {
+            var graphQlResponse = await SendAsync();
+            var response = ProcessResponse<TDto>(graphQlResponse);
+
+            return response;
+        }
+
+
+        private async Task<GraphQLResponse> SendAsync()
+        {
+            return _usePostResponse
+                ? await _client.PostAsync(_request)
+                : await _client.GetAsync(_request);
+        }
+
+        private static Response<TDto> ProcessResponse<TDto>(GraphQLResponse graphQlResponse)
+        {
+            if (graphQlResponse.Errors != null && graphQlResponse.Errors.Length > 0)
+            {
+                var errors = graphQlResponse.Errors.Select(
+                        e => new Error(
+                            e.Message,
+                            e.Locations?.Select(l => new Error.Location(l.Column, l.Line)).ToList(),
+                            e.AdditonalEntries?.ToDictionary(p => p.Key, p => (object)p.Value)))
+                    .ToList();
+
+                return new Response<TDto>(errors);
+            }
+
+            var jData = (JToken)graphQlResponse.Data;
+            var dto = jData.ToObject<TDto>();
+
+            return new Response<TDto>(dto);
+        }
+    }
+
+    public class GraphQlClient<T> : GraphQlClient, IGraphQlClient<T>
+    {
+        public GraphQlClient(
+            string url,
+            string query,
+            Dictionary<string, object> variables,
+            bool usePostResponse)
+            : base(url, query, variables, usePostResponse)
+        {
+        }
+
+
+        public async Task<Response<T>> RequestAsync()
+        {
+            return await RequestAsync<T>();
+        }
+    }
+
+    public class ClientFactory<TDto>
+    {
+        private readonly string _url;
+        private readonly string _requestType;
+        private readonly TypeBase _type;
+
+
+        public ClientFactory(string url, string requestType, TypeBase type)
+        {
+            _url = url;
+            _requestType = requestType;
+            _type = type;
+        }
+
+
+        public IGraphQlClient<TDto> CreateClient()
+        {
+            var arguments = ((IArgumentsProvider)_type).GetArguments().ToList();
+            var query = BuildQuery(arguments);
+            var variables = arguments.ToDictionary(a => a.Id, a => a.Value);
+
+            return new GraphQlClient<TDto>(_url, query, variables, usePostResponse: true);
+        }
+
+
+        private string BuildQuery(List<Argument> arguments)
+        {
+            var stringBuilder = new StringBuilder(_requestType);
+
+            if (arguments.Count > 0)
+            {
+                stringBuilder.Append("(");
+                foreach (var argument in arguments)
+                {
+                    stringBuilder.Append($"${argument.Id}:{argument.Type},");
+                }
+                stringBuilder.Length--;
+                stringBuilder.Append(")");
+            }
+
+            stringBuilder.Append("{");
+            ((IRequestBuilder)_type).AppendRequest(stringBuilder);
+            stringBuilder.Append("}");
+
+            return stringBuilder.ToString();
+        }
+    }
+
+    #endregion
+
+    #region Providers
+
+    public interface IArgumentsProvider
+    {
+        IEnumerable<Argument> GetArguments();
+    }
+
+    public interface INameProvider
+    {
+        string Name { get; }
+    }
+
+    public interface IRequestBuilder
+    {
+        void AppendRequest(StringBuilder builder);
+    }
+
+    #endregion
+
+    #region Fields
+
+    public sealed class Argument
+    {
+        public string Id { get; }
+        public string Name { get; }
+        public string Type { get; }
+        public object Value { get; }
+
+
+        public Argument(string name, string type, object value)
+        {
+            Name = name;
+            Type = type;
+            Value = value;
+
+            Id = $"{Name}_{Guid.NewGuid():N}";
+        }
+    }
+
+    public class Field : FieldBase
+    {
+        private readonly List<Argument> _arguments;
+
+
+        public Field(string key, List<Argument> arguments, TypeBase type)
+            : base(key, type)
+        {
+            _arguments = arguments;
+        }
+
+
+        protected sealed override void AppendArguments(StringBuilder builder)
+        {
+            if (_arguments.Count > 0)
+            {
+                builder.Append("(");
+                foreach (var argument in _arguments)
+                {
+                    builder.Append($"{argument.Name}:${argument.Id},");
+                }
+                builder.Length--;
+                builder.Append(")");
+            }
+        }
+
+        protected override IEnumerable<Argument> GetArguments()
+        {
+            foreach (var argument in base.GetArguments())
+            {
+                yield return argument;
+            }
+
+            foreach (var argument in _arguments)
+            {
+                yield return argument;
+            }
+        }
+    }
+
+    public class OnTypeField : FieldBase
+    {
+        public OnTypeField(TypeBase type)
+            : base($"... on {((INameProvider)type).Name}", type)
+        {
+        }
+
+        protected override void AppendArguments(StringBuilder builder)
+        {
+        }
+    }
+
+    public abstract class FieldBase : IRequestBuilder, IArgumentsProvider
+    {
+        private readonly string _key;
+
+
+        protected TypeBase Type { get; }
+
+
+        protected FieldBase(string key, TypeBase type)
+        {
+            _key = key;
+            Type = type;
+        }
+
+
+        void IRequestBuilder.AppendRequest(StringBuilder builder)
+        {
+            builder.Append(_key);
+
+            AppendArguments(builder);
+
+            if (Type is IRequestBuilder typeRequestBuilder)
+            {
+                builder.Append("{");
+                typeRequestBuilder.AppendRequest(builder);
+                builder.Append("}");
+            }
+        }
+
+        IEnumerable<Argument> IArgumentsProvider.GetArguments()
+        {
+            return GetArguments();
+        }
+
+
+        protected abstract void AppendArguments(StringBuilder builder);
+
+        protected virtual IEnumerable<Argument> GetArguments()
+        {
+            return Type != null
+                ? ((IArgumentsProvider)Type).GetArguments()
+                : Enumerable.Empty<Argument>();
+        }
+    }
+
+    #endregion
+
+    #region Types
+
+    public abstract class InterfaceBase : TypeBase
+    {
+        protected InterfaceBase(string name) : base(name)
+        {
+        }
+
+
+        protected void IncludeOnTypeField(TypeBase type)
+        {
+            Include(new OnTypeField(type));
+        }
+    }
+
+    public abstract class TypeBase : IRequestBuilder, IArgumentsProvider, INameProvider
+    {
+        private readonly string _name;
+        private readonly List<FieldBase> _fields;
+
+
+        string INameProvider.Name => _name;
+
+
+        protected TypeBase(string name)
+        {
+            _name = name;
+            _fields = new List<FieldBase>();
+        }
+
+
+        void IRequestBuilder.AppendRequest(StringBuilder builder)
+        {
+            foreach (var field in _fields)
+            {
+                var requestBuilder = (IRequestBuilder)field;
+                if (requestBuilder != null)
+                {
+                    requestBuilder.AppendRequest(builder);
+                    builder.Append(" ");
+                }
+            }
+        }
+
+        IEnumerable<Argument> IArgumentsProvider.GetArguments()
+        {
+            foreach (var field in _fields)
+            {
+                var argumentsProvider = (IArgumentsProvider)field;
+                if (argumentsProvider != null)
+                {
+                    foreach (var argument in argumentsProvider.GetArguments())
+                    {
+                        yield return argument;
+                    }
+                }
+            }
+        }
+
+
+        protected void IncludeField(string fieldName, List<Argument> arguments, TypeBase type)
+        {
+            _fields.Add(new Field(fieldName, arguments, type));
+        }
+
+        protected void Include(FieldBase field)
+        {
+            _fields.Add(field);
+        }
+    }
+
+    #endregion
+
+}

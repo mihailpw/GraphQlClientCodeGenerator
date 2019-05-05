@@ -9,6 +9,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Templates\infra.mustache" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Templates\infra.mustache" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Stubble.Core" Version="1.2.7" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\GQLCCG.Infra\GQLCCG.Infra.csproj" />
   </ItemGroup>
 
