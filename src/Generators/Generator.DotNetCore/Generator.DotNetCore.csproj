@@ -9,6 +9,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Templates\builder-method-args.handlebars" />
+    <None Remove="Templates\builder-method-object.handlebars" />
+    <None Remove="Templates\builder-method-scalar.handlebars" />
     <None Remove="Templates\builder.handlebars" />
     <None Remove="Templates\client.handlebars" />
     <None Remove="Templates\dto.handlebars" />
@@ -16,6 +19,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Templates\builder-method-args.handlebars" />
+    <EmbeddedResource Include="Templates\builder-method-scalar.handlebars" />
+    <EmbeddedResource Include="Templates\builder-method-object.handlebars" />
     <EmbeddedResource Include="Templates\client.handlebars" />
     <EmbeddedResource Include="Templates\builder.handlebars" />
     <EmbeddedResource Include="Templates\dto.handlebars" />

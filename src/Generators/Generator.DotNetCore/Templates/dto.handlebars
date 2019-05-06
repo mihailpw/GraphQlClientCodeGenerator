@@ -1,9 +1,9 @@
-    public class {{ resolveDtoName | this }}
+    public class {{ resolveDtoName this }}
     {
-    {{#each fields }}
-        public {{{ resolveDtoName | type }}} {{ toPascal | name }} { get; set; }
-    {{/each}}
-    {{#each inputFields }}
-        public {{{ resolveDtoName | type }}} {{ toPascal | name }} { get; set; }{{#if defaultValue }} = {{ defaultValue }};{{/if}}
-    {{/each}}
+{{#each fields }}
+        public {{{ resolveDtoName type }}} {{ toPascal name }} { get; set; }
+{{/each}}
+{{#each inputFields }}
+        public {{{ resolveDtoName type }}} {{ toPascal name }} { get; set; }{{#if defaultValue }} = {{{ resolveDefaultValue this }}};{{/if}}
+{{/each}}
     }

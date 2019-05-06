@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Generator.DotNetCore.Helpers;
 using GQLCCG.Infra;
@@ -13,12 +13,60 @@ namespace Generator.DotNetCore.Infra
     {
         public HandlebarsTemplateBuilder(GeneratorContext context)
         {
-            var nameResolver = new NameResolver(context);
+            var typeHelper = new GraphQlTypeHelper(context);
 
-            Handlebars.RegisterHelper("resolveDtoName", (output, _, arguments) => output.Write(nameResolver.ResolveDtoName(GetFromArguments(arguments))));
-            Handlebars.RegisterHelper("resolveBuilderName", (output, _, arguments) => output.Write(nameResolver.ResolveBuilderName(GetFromArguments(arguments))));
-            Handlebars.RegisterHelper("resolveGraphQlType", (output, _, arguments) => output.Write(nameResolver.ResolveGraphQlType(GetFromArguments(arguments))));
-            Handlebars.RegisterHelper("toPascal", ToPascal);
+            foreach (var methodInfo in typeof(GraphQlTypeHelper)
+                .GetMethods()
+                .Where(m => m
+                    .CustomAttributes
+                    .Any(a => a.AttributeType == typeof(GraphQlTypeHelper.AutoWire))))
+            {
+                if (methodInfo.ReturnType == typeof(string))
+                {
+                    Handlebars.RegisterHelper(
+                        methodInfo.Name,
+                        (output, _, args) => output.Write((string)methodInfo.Invoke(typeHelper, args)));
+                }
+                else if (methodInfo.ReturnType == typeof(bool))
+                {
+                    Handlebars.RegisterHelper(
+                        methodInfo.Name,
+                        (output, opt, ctx, args) =>
+                        {
+                            if ((bool) methodInfo.Invoke(typeHelper, args))
+                            {
+                                opt.Template(output, ctx);
+                            }
+                            else
+                            {
+                                opt.Inverse(output, ctx);
+                            }
+                        });
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
+            }
+
+            Handlebars.RegisterHelper(
+                "ifKind",
+                (output, opt, ctx, args) =>
+                {
+                    var resolvedArgs = args.ResolveArgumentsInfinity<GraphQlTypeBase, string>();
+                    if (typeHelper.IfKind(resolvedArgs.first, resolvedArgs.second))
+                    {
+                        opt.Template(output, ctx);
+                    }
+                    else
+                    {
+                        opt.Inverse(output, ctx);
+                    }
+                });
+
+            Handlebars.RegisterHelper(
+                "toPascal",
+                (output, _, args) => output.Write(args.ResolveArgument<string>().ToPascal()));
         }
 
 
@@ -36,28 +84,6 @@ namespace Generator.DotNetCore.Infra
             var result = builder(data);
 
             return Task.FromResult(result);
-        }
-
-
-        private static void ToPascal(TextWriter output, object context, object[] arguments)
-        {
-            var value = string.Concat(arguments);
-            var pascalValue = value.ToPascal();
-            output.Write(pascalValue);
-        }
-
-        private static GraphQlTypeBase GetFromArguments(IReadOnlyList<object> arguments)
-        {
-            if (arguments.Count != 1)
-            {
-                throw new InvalidOperationException("Should be 1 argument: type object.");
-            }
-            if (!(arguments[0] is GraphQlTypeBase type))
-            {
-                throw new InvalidOperationException("Should be type object.");
-            }
-
-            return type;
         }
     }
 }

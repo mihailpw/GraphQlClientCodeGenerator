@@ -27,30 +27,35 @@ namespace Generator.DotNetCore
             var infraTemplate = await _templateReader.ReadAsync("infra");
             var infraView = await _templateBuilder.BuildAsync(
                 infraTemplate,
-                new
-                {
-                    @namespace = context.Namespace,
-                });
+                new { context.Namespace });
 
-            var dtoPartial = await _templateReader.ReadAsync("dto");
-            var builderPartial = await _templateReader.ReadAsync("builder");
-            var partials = new Dictionary<string, string>
-            {
-                ["dto"] = dtoPartial,
-                ["builder"] = builderPartial,
-            };
-
+            var partials = await ResolveTemplates("dto", "builder", "builder-method-args", "builder-method-object", "builder-method-scalar");
             var clientTemplate = await _templateReader.ReadAsync("client");
             var clientView = await _templateBuilder.BuildAsync(
                 clientTemplate,
                 new
                 {
-                    @namespace = context.Namespace,
+                    context.Namespace,
+                    context.MainClientFactoryClassName,
                     schema,
                 },
                 partials);
 
             await _writer.WriteAsync(string.Join(Environment.NewLine, infraView, clientView));
+        }
+
+
+        private async Task<IDictionary<string, string>> ResolveTemplates(params string[] templateNames)
+        {
+            var dict = new Dictionary<string, string>();
+
+            foreach (var templateName in templateNames)
+            {
+                var template = await _templateReader.ReadAsync(templateName);
+                dict.Add(templateName, template);
+            }
+
+            return dict;
         }
     }
 }

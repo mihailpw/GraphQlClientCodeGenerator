@@ -1,0 +1,15 @@
+    public class {{ resolveBuilderName this }} : TypeBase
+    {
+        public {{ resolveBuilderName this }}() : base("{{ name }}")
+        {
+        }
+
+{{#each fields }}
+
+    {{#ifKind type "object" "interface" "union" }}
+        {{> builder-method-object }}
+    {{else}}
+        {{> builder-method-scalar }}
+    {{/ifKind}}
+{{/each}}
+    }

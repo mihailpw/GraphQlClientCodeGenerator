@@ -90,9 +90,14 @@ namespace {{ namespace }}.Infra
         }
     }
 
-    public interface IGraphQlClient<T> : IGraphQlClient
+    public interface IGraphQlClient
     {
-        Task<Response<T>> RequestAsync();
+        Task<Response<TDto>> RequestAsync<TDto>();
+    }
+
+    public interface IGraphQlClient<TDto> : IGraphQlClient
+    {
+        Task<Response<TDto>> RequestAsync();
     }
 
     public class GraphQlClient : IGraphQlClient
@@ -361,19 +366,6 @@ namespace {{ namespace }}.Infra
 
     #region Types
 
-    public abstract class InterfaceBase : TypeBase
-    {
-        protected InterfaceBase(string name) : base(name)
-        {
-        }
-
-
-        protected void IncludeOnTypeField(TypeBase type)
-        {
-            Include(new OnTypeField(type));
-        }
-    }
-
     public abstract class TypeBase : IRequestBuilder, IArgumentsProvider, INameProvider
     {
         private readonly string _name;
@@ -424,9 +416,9 @@ namespace {{ namespace }}.Infra
             _fields.Add(new Field(fieldName, arguments, type));
         }
 
-        protected void Include(FieldBase field)
+        protected void IncludeOnTypeField(TypeBase type)
         {
-            _fields.Add(field);
+            _fields.Add(new OnTypeField(type));
         }
     }
 

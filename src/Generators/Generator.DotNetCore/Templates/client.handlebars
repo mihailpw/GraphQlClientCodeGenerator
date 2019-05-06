@@ -11,32 +11,96 @@ namespace {{ namespace }}
     {{> dto }}
 
 {{/each}}
+{{#if schema.queryType }}
+{{#with schema.queryType }}
+    {{> dto }}
+
+{{/with}}
+{{/if}}
+{{#if schema.mutationType }}
+{{#with schema.mutationType }}
+    {{> dto }}
+
+{{/with}}
+{{/if}}
+{{#if schema.subscriptionType }}
+{{#with schema.subscriptionType }}
+    {{> dto }}
+
+{{/with}}
+{{/if}}
     #endregion
 
     #region Builders
 
 {{#each schema.types }}
+    {{#ifKind this "object" "interface" "union" }}
     {{> builder }}
 
+    {{/ifKind}}
 {{/each}}
+{{#if schema.queryType }}
+{{#with schema.queryType }}
+    {{> builder }}
+
+{{/with}}
+{{/if}}
+{{#if schema.mutationType }}
+{{#with schema.mutationType }}
+    {{> builder }}
+
+{{/with}}
+{{/if}}
+{{#if schema.subscriptionType }}
+{{#with schema.subscriptionType }}
+    {{> builder }}
+
+{{/with}}
+{{/if}}
     #endregion
 
-    public class AppClientFactory
+    public class {{ mainClientFactoryClassName }}
     {
         private readonly string _url;
 
 
-        public AppClientFactory(string url)
+        public {{ mainClientFactoryClassName }}(string url)
         {
             _url = url;
         }
+        
+{{#if schema.queryType }}
+{{#with schema.queryType }}
 
-
-        public ClientFactory<QueryDto> ForQuery(Action<QueryType> setupAction)
+        public ClientFactory<{{ resolveDtoName this }}> ForQuery(Action<{{ resolveBuilderName this }}> setupAction)
         {
-            var type = new QueryType();
+            var type = new {{ resolveBuilderName this }}();
             setupAction(type);
-            return new ClientFactory<QueryDto>(_url, "query", type);
+            return new ClientFactory<{{ resolveDtoName this }}>(_url, "query", type);
         }
+{{/with}}
+{{/if}}
+{{#if schema.mutationType }}
+{{#with schema.mutationType }}
+
+        public ClientFactory<{{ resolveDtoName this }}> ForMutation(Action<{{ resolveBuilderName this }}> setupAction)
+        {
+            var type = new {{ resolveBuilderName this }}();
+            setupAction(type);
+            return new ClientFactory<{{ resolveDtoName this }}>(_url, "mutation", type);
+        }
+{{/with}}
+{{/if}}
+{{#if schema.subscriptionType }}
+{{#with schema.subscriptionType }}
+
+        public ClientFactory<{{ resolveDtoName this }}> ForSubscription(Action<{{ resolveBuilderName this }}> setupAction)
+        {
+            var type = new {{ resolveBuilderName this }}();
+            setupAction(type);
+            return new ClientFactory<{{ resolveDtoName this }}>(_url, "subscription", type);
+        }
+{{/with}}
+{{/if}}
     }
 }

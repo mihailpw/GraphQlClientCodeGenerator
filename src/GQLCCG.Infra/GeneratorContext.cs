@@ -4,6 +4,8 @@
     {
         public string Namespace { get; set; } = "GraphQlClient";
 
+        public string MainClientFactoryClassName { get; set; } = "AppClientFactory";
+
         public TypeNames TypeTrims { get; } = new TypeNames
         {
             Enum = "",
