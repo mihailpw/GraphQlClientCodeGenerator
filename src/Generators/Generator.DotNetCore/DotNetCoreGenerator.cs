@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Generator.DotNetCore.Infra;
 using GQLCCG.Infra;
 using GQLCCG.Infra.Models;
 
@@ -11,8 +12,12 @@ namespace Generator.DotNetCore
         {
             using (var writer = await writerFactory.CreateAsync("schema"))
             {
-                var generatorWriter = new GeneratorWriter(writer);
-                await generatorWriter.GenerateAsync(schema);
+                var generatorWriter = new GeneratorWriter(
+                    new ResourcesTemplateReader(),
+                    new HandlebarsTemplateBuilder(context),
+                    writer);
+
+                await generatorWriter.GenerateAsync(schema, context);
             }
         }
     }

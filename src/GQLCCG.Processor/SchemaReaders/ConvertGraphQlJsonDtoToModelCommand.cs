@@ -4,6 +4,7 @@ using System.Linq;
 using GQLCCG.Infra.Models;
 using GQLCCG.Infra.Models.Objects;
 using GQLCCG.Infra.Models.Types;
+using GQLCCG.Processor.Core;
 
 namespace GQLCCG.Processor.SchemaReaders
 {
@@ -13,6 +14,7 @@ namespace GQLCCG.Processor.SchemaReaders
         {
             var types = ConvertToTypesWithRefs(dto.Types).ToList();
             PopulateTypesWithRefs(types);
+            PostProcessTypes(types);
 
             var queryType = SelectObjectType(dto.QueryType, types);
             var mutationType = SelectObjectType(dto.MutationType, types);
@@ -261,6 +263,40 @@ namespace GQLCCG.Processor.SchemaReaders
             }
         }
 
+        private static void PostProcessTypes(IEnumerable<GraphQlTypeBase> types)
+        {
+            foreach (var type in types)
+            {
+                var fieldsHolder = type as IGraphQlFieldsHolder;
+
+                if (fieldsHolder != null)
+                {
+                    foreach (var field in fieldsHolder.Fields)
+                    {
+                        field.Owner = type;
+                    }
+                }
+
+                if (type is IGraphQlTypesHolder typesHolder)
+                {
+                    var possibleFields = typesHolder.PossibleTypes
+                        .OfType<IGraphQlFieldsHolder>()
+                        .SelectMany(t => t.Fields)
+                        .DistinctBy(t => t.Name);
+
+                    if (fieldsHolder != null)
+                    {
+                        possibleFields = possibleFields
+                            .Where(pf => fieldsHolder.Fields
+                                .All(f => f.Name != pf.Name));
+                    }
+
+                    typesHolder.PossibleFields = possibleFields.ToList();
+                }
+            }
+        }
+
+
         private static GraphQlObjectType SelectObjectType(GraphQlJsonDto.TypeRef typeRef, IEnumerable<GraphQlTypeBase> types)
         {
             if (typeRef == null)
@@ -280,6 +316,9 @@ namespace GQLCCG.Processor.SchemaReaders
 
         private class TypeRef : GraphQlTypeBase
         {
+            public override GraphQlKind Kind => 0;
+
+
             public TypeRef(string name)
             {
                 Name = name;

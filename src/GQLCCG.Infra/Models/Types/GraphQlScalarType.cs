@@ -2,6 +2,8 @@
 {
     public class GraphQlScalarType : GraphQlTypeBase
     {
+        public override GraphQlKind Kind => GraphQlKind.Scalar;
+
         public ScalarTypes Type { get; set; }
     }
 

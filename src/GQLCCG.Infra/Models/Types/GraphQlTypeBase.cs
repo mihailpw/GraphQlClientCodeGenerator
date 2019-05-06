@@ -2,5 +2,6 @@
 {
     public abstract class GraphQlTypeBase : GraphQlEntityBase
     {
+        public abstract GraphQlKind Kind { get; }
     }
 }

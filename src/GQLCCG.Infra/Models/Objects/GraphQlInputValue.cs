@@ -2,7 +2,7 @@
 
 namespace GQLCCG.Infra.Models.Objects
 {
-    public class GraphQlInputValue : GraphQlEntityBase
+    public class GraphQlInputValue : GraphQlObjectBase
     {
         public GraphQlTypeBase Type { get; set; }
 
