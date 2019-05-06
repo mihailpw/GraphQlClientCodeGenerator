@@ -93,9 +93,11 @@ namespace Generator.DotNetCore.Helpers
         }
 
         [AutoWire]
-        public string ResolveDefaultValue(GraphQlInputValue inputValue)
+        public string ResolveDefaultValue(GraphQlInputValue inputValue, string format)
         {
-            return inputValue.DefaultValue;
+            return inputValue.Type is GraphQlNonNullType
+                ? string.Empty
+                : string.Format(format, inputValue.DefaultValue);
         }
 
         public bool IfKind(GraphQlTypeBase type, string[] kindValues)

@@ -4,6 +4,6 @@
         public {{{ resolveDtoName type }}} {{ toPascal name }} { get; set; }
 {{/each}}
 {{#each inputFields }}
-        public {{{ resolveDtoName type }}} {{ toPascal name }} { get; set; }{{#if defaultValue }} = {{{ resolveDefaultValue this }}};{{/if}}
+        public {{{ resolveDtoName type }}} {{ toPascal name }} { get; set; }{{{ resolveDefaultValue this " = {0};" }}}
 {{/each}}
     }

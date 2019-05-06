@@ -41,7 +41,8 @@ namespace Generator.DotNetCore
                 },
                 partials);
 
-            await _writer.WriteAsync(string.Join(Environment.NewLine, infraView, clientView));
+            var result = string.Join(Environment.NewLine, infraView, clientView);
+            await _writer.WriteAsync(result);
         }
 
 

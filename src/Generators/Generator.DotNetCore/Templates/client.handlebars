@@ -62,11 +62,13 @@ namespace {{ namespace }}
     public class {{ mainClientFactoryClassName }}
     {
         private readonly string _url;
+        private readonly bool _usePostResponse;
 
 
-        public {{ mainClientFactoryClassName }}(string url)
+        public {{ mainClientFactoryClassName }}(string url, bool usePostResponse = true)
         {
             _url = url;
+            _usePostResponse = usePostResponse;
         }
         
 {{#if schema.queryType }}
@@ -76,7 +78,7 @@ namespace {{ namespace }}
         {
             var type = new {{ resolveBuilderName this }}();
             setupAction(type);
-            return new ClientFactory<{{ resolveDtoName this }}>(_url, "query", type);
+            return new ClientFactory<{{ resolveDtoName this }}>(_url, "query", type, _usePostResponse);
         }
 {{/with}}
 {{/if}}
@@ -87,7 +89,7 @@ namespace {{ namespace }}
         {
             var type = new {{ resolveBuilderName this }}();
             setupAction(type);
-            return new ClientFactory<{{ resolveDtoName this }}>(_url, "mutation", type);
+            return new ClientFactory<{{ resolveDtoName this }}>(_url, "mutation", type, _usePostResponse);
         }
 {{/with}}
 {{/if}}
@@ -98,7 +100,7 @@ namespace {{ namespace }}
         {
             var type = new {{ resolveBuilderName this }}();
             setupAction(type);
-            return new ClientFactory<{{ resolveDtoName this }}>(_url, "subscription", type);
+            return new ClientFactory<{{ resolveDtoName this }}>(_url, "subscription", type, _usePostResponse);
         }
 {{/with}}
 {{/if}}

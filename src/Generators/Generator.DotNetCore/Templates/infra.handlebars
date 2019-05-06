@@ -181,13 +181,15 @@ namespace {{ namespace }}.Infra
         private readonly string _url;
         private readonly string _requestType;
         private readonly TypeBase _type;
+        private readonly bool _usePostResponse;
 
 
-        public ClientFactory(string url, string requestType, TypeBase type)
+        public ClientFactory(string url, string requestType, TypeBase type, bool usePostResponse)
         {
             _url = url;
             _requestType = requestType;
             _type = type;
+            _usePostResponse = usePostResponse;
         }
 
 
@@ -197,7 +199,7 @@ namespace {{ namespace }}.Infra
             var query = BuildQuery(arguments);
             var variables = arguments.ToDictionary(a => a.Id, a => a.Value);
 
-            return new GraphQlClient<TDto>(_url, query, variables, usePostResponse: true);
+            return new GraphQlClient<TDto>(_url, query, variables, _usePostResponse);
         }
 
 

@@ -12,4 +12,13 @@
         {{> builder-method-scalar }}
     {{/ifKind}}
 {{/each}}
+{{#each possibleTypes }}
+        public {{ resolveBuilderName ../ }} On{{ resolveBuilderName this }}(Action<{{ resolveBuilderName this }}> setupAction)
+        {
+            var type = new {{ resolveBuilderName this }}();
+            setupAction(type);
+            IncludeOnTypeField(type);
+            return this;
+        }
+{{/each}}
     }
