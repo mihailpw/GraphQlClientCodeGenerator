@@ -31,15 +31,15 @@ namespace Generator.DotNetCore.Helpers
                     switch (scalarType.Type)
                     {
                         case ScalarTypes.String:
-                            return nameof(String);
+                            return "string";
                         case ScalarTypes.Boolean:
-                            return nameof(Boolean);
+                            return "bool";
                         case ScalarTypes.Float:
-                            return nameof(Single);
+                            return "float";
                         case ScalarTypes.Int:
-                            return nameof(Int32);
+                            return "int";
                         case ScalarTypes.Id:
-                            return nameof(String);
+                            return "string";
                         case ScalarTypes.Date:
                             return nameof(DateTime);
                         case ScalarTypes.DateTime:
@@ -47,11 +47,11 @@ namespace Generator.DotNetCore.Helpers
                         case ScalarTypes.DateTimeOffset:
                             return nameof(DateTimeOffset);
                         case ScalarTypes.Seconds:
-                            return nameof(Int64);
+                            return "long";
                         case ScalarTypes.Milliseconds:
-                            return nameof(Int64);
+                            return "long";
                         case ScalarTypes.Decimal:
-                            return nameof(Decimal);
+                            return "decimal";
                         default:
                             throw new ArgumentOutOfRangeException(nameof(scalarType.Type), scalarType.Type, null);
                     }

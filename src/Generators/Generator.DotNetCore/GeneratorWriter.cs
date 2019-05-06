@@ -36,6 +36,7 @@ namespace Generator.DotNetCore
                 new
                 {
                     context.Namespace,
+                    context.AdditionalClientUsing,
                     context.MainClientFactoryClassName,
                     schema,
                 },

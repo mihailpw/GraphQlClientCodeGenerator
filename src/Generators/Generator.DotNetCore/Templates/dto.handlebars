@@ -6,4 +6,10 @@
 {{#each inputFields }}
         public {{{ resolveDtoName type }}} {{ toPascal name }} { get; set; }{{{ resolveDefaultValue this " = {0};" }}}
 {{/each}}
+{{#each possibleFields }}
+        /// <summary>
+        /// Possible field for <see cref="{{ resolveDtoName owner }}"/>.
+        /// </summary>
+        public {{{ resolveDtoName type }}} {{ toPascal name }} { get; set; }
+{{/each}}
     }

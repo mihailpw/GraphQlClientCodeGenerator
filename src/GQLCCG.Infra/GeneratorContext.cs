@@ -1,10 +1,14 @@
-﻿namespace GQLCCG.Infra
+﻿using System.Collections.Generic;
+
+namespace GQLCCG.Infra
 {
     public class GeneratorContext
     {
         public string Namespace { get; set; } = "GraphQlClient";
 
         public string MainClientFactoryClassName { get; set; } = "AppClientFactory";
+
+        public IList<string> AdditionalClientUsing { get; set; } = new List<string>();
 
         public TypeNames TypeTrims { get; } = new TypeNames
         {

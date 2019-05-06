@@ -1,9 +1,11 @@
 namespace {{ namespace }}
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using Infra;
+{{#each additionalClientUsing }}
+    using {{ this }};
+{{/each}}
 
     #region Dtos
 
