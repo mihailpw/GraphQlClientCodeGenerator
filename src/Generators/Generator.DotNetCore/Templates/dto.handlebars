@@ -1,15 +1,46 @@
+{{#withDocs}}
+    /// <summary>
+    {{#if description}}
+    /// {{ description }}.
+    {{/if}}
+    {{#ifKind this "object" "interface" "union" }}
+    /// Builder: <see cref="{{ resolveBuilderName this }}" />.
+    {{else ifKind this "inputObject" }}
+    /// Input dto.
+    {{/ifKind}}
+    /// </summary>
+{{/withDocs}}
     public class {{ resolveDtoName this }}
     {
 {{#each fields }}
+    {{#withDocs}}
+        {{#if description}}
+        /// <summary>
+        /// {{ description }}.
+        /// </summary>
+        {{/if}}
+    {{/withDocs}}
         public {{{ resolveDtoName type }}} {{ toPascal name }} { get; set; }
 {{/each}}
 {{#each inputFields }}
+    {{#withDocs}}
+        {{#if description}}
+        /// <summary>
+        /// {{ description }}.
+        /// </summary>
+        {{/if}}
+    {{/withDocs}}
         public {{{ resolveDtoName type }}} {{ toPascal name }} { get; set; }{{{ resolveDefaultValue this " = {0};" }}}
 {{/each}}
 {{#each possibleFields }}
+    {{#withDocs}}
         /// <summary>
-        /// Possible field for <see cref="{{ resolveDtoName owner }}"/>.
+        {{#if description}}
+        /// {{ description }}.
+        {{/if}}
+        /// Extension: <see cref="{{ resolveDtoName ownerType }}.{{ toPascal name }}" />.
         /// </summary>
+    {{/withDocs}}
         public {{{ resolveDtoName type }}} {{ toPascal name }} { get; set; }
 {{/each}}
     }

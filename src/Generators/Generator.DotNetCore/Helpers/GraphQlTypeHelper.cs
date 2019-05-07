@@ -75,6 +75,12 @@ namespace Generator.DotNetCore.Helpers
         }
 
         [AutoWire]
+        public string ResolveOnTypeMethodName(GraphQlTypeBase type)
+        {
+            return $"On{type.Name.ToPascal()}";
+        }
+
+        [AutoWire]
         public string ResolveBuilderName(GraphQlTypeBase type)
         {
             type = type.GetRealType();

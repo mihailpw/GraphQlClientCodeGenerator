@@ -10,6 +10,8 @@ namespace GQLCCG.Infra
 
         public IList<string> AdditionalClientUsing { get; set; } = new List<string>();
 
+        public bool GenerateDocs { get; set; } = false;
+
         public TypeNames TypeTrims { get; } = new TypeNames
         {
             Enum = "",

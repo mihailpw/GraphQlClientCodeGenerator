@@ -8,7 +8,5 @@ namespace GQLCCG.Infra.Models.Objects
         public GraphQlTypeBase Type { get; set; }
 
         public IList<GraphQlInputValue> Args { get; set; }
-
-        public GraphQlTypeBase Owner { get; set; }
     }
 }

@@ -65,6 +65,20 @@ namespace Generator.DotNetCore.Infra
                 });
 
             Handlebars.RegisterHelper(
+                "withDocs",
+                (output, opt, ctx, args) =>
+                {
+                    if (context.GenerateDocs)
+                    {
+                        opt.Template(output, ctx);
+                    }
+                    else
+                    {
+                        opt.Inverse(output, ctx);
+                    }
+                });
+
+            Handlebars.RegisterHelper(
                 "toPascal",
                 (output, _, args) => output.Write(args.ResolveArgument<string>().ToPascal()));
         }

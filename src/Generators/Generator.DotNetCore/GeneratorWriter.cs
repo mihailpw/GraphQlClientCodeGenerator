@@ -36,13 +36,14 @@ namespace Generator.DotNetCore
                 new
                 {
                     context.Namespace,
-                    context.AdditionalClientUsing,
                     context.MainClientFactoryClassName,
+                    context.AdditionalClientUsing,
+                    context.GenerateDocs,
                     schema,
                 },
                 partials);
 
-            var result = string.Join(Environment.NewLine, infraView, clientView);
+            var result = string.Join(Environment.NewLine, clientView, infraView);
             await _writer.WriteAsync(result);
         }
 

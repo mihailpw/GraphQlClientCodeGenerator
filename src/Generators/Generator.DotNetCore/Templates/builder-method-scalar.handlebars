@@ -3,14 +3,14 @@
             IncludeField(
                 "{{ name }}",
     {{#if args }}
-                    new List<Argument>
-                    {
+                new List<Argument>
+                {
         {{#each args }}
-                        new Argument("{{ name }}", "{{ resolveGraphQlTypeName type }}", {{name}}),
+                    new Argument("{{ name }}", "{{ resolveGraphQlTypeName type }}", {{name}}),
         {{/each}}
-                    },
+                },
     {{else}}
-                    new List<Argument>(0),
+                new List<Argument>(0),
     {{/if}}
                 null);
             return this;

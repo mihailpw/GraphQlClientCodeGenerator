@@ -265,33 +265,68 @@ namespace GQLCCG.Processor.SchemaReaders
 
         private static void PostProcessTypes(IEnumerable<GraphQlTypeBase> types)
         {
-            foreach (var type in types)
+            void SetOwnerToInputValues(GraphQlTypeBase ownerType, IEnumerable<GraphQlInputValue> inputValues)
             {
-                var fieldsHolder = type as IGraphQlFieldsHolder;
-
-                if (fieldsHolder != null)
+                foreach (var inputValue in inputValues)
                 {
-                    foreach (var field in fieldsHolder.Fields)
-                    {
-                        field.Owner = type;
-                    }
+                    inputValue.OwnerType = ownerType;
+                }
+            }
+            void SetOwnerToFields(GraphQlTypeBase ownerType, IEnumerable<GraphQlField> fields)
+            {
+                foreach (var field in fields)
+                {
+                    field.OwnerType = ownerType;
+                    SetOwnerToInputValues(ownerType, field.Args);
+                }
+            }
+            void SetOwnerToEnumValues(GraphQlTypeBase ownerType, IEnumerable<GraphQlEnumValue> enumValues)
+            {
+                foreach (var enumValue in enumValues)
+                {
+                    enumValue.OwnerType = ownerType;
+                }
+            }
+            void TrySetupPossibleTypes(GraphQlTypeBase type)
+            {
+                if (!(type is IGraphQlTypesHolder typesHolder))
+                {
+                    return;
                 }
 
-                if (type is IGraphQlTypesHolder typesHolder)
+                var possibleFields = typesHolder.PossibleTypes
+                    .OfType<IGraphQlFieldsHolder>()
+                    .SelectMany(t => t.Fields)
+                    .DistinctBy(t => t.Name);
+
+                if (type is IGraphQlFieldsHolder fieldsHolder)
                 {
-                    var possibleFields = typesHolder.PossibleTypes
-                        .OfType<IGraphQlFieldsHolder>()
-                        .SelectMany(t => t.Fields)
-                        .DistinctBy(t => t.Name);
+                    possibleFields = possibleFields
+                        .Where(pf => fieldsHolder.Fields
+                            .All(f => f.Name != pf.Name));
+                }
 
-                    if (fieldsHolder != null)
-                    {
-                        possibleFields = possibleFields
-                            .Where(pf => fieldsHolder.Fields
-                                .All(f => f.Name != pf.Name));
-                    }
+                typesHolder.PossibleFields = possibleFields.ToList();
+            }
 
-                    typesHolder.PossibleFields = possibleFields.ToList();
+            foreach (var type in types)
+            {
+                TrySetupPossibleTypes(type);
+
+                switch (type)
+                {
+                    case GraphQlEnumType enumType:
+                        SetOwnerToEnumValues(enumType, enumType.EnumValues);
+                        break;
+                    case GraphQlInputObjectType inputObjectType:
+                        SetOwnerToInputValues(inputObjectType, inputObjectType.InputFields);
+                        break;
+                    case GraphQlInterfaceType interfaceType:
+                        SetOwnerToFields(interfaceType, interfaceType.Fields);
+                        break;
+                    case GraphQlObjectType objectType:
+                        SetOwnerToFields(objectType, objectType.Fields);
+                        break;
                 }
             }
         }
