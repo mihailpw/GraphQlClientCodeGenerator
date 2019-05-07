@@ -33,25 +33,25 @@ namespace Generator.DotNetCore.Helpers
                         case ScalarTypes.String:
                             return "string";
                         case ScalarTypes.Boolean:
-                            return "bool";
+                            return "bool?";
                         case ScalarTypes.Float:
-                            return "float";
+                            return "float?";
                         case ScalarTypes.Int:
-                            return "int";
+                            return "int?";
                         case ScalarTypes.Id:
                             return "string";
                         case ScalarTypes.Date:
-                            return nameof(DateTime);
+                            return "DateTime?";
                         case ScalarTypes.DateTime:
-                            return nameof(DateTime);
+                            return "DateTime?";
                         case ScalarTypes.DateTimeOffset:
-                            return nameof(DateTimeOffset);
+                            return "DateTimeOffset?";
                         case ScalarTypes.Seconds:
-                            return "long";
+                            return "long?";
                         case ScalarTypes.Milliseconds:
-                            return "long";
+                            return "long?";
                         case ScalarTypes.Decimal:
-                            return "decimal";
+                            return "decimal?";
                         default:
                             throw new ArgumentOutOfRangeException(nameof(scalarType.Type), scalarType.Type, null);
                     }
