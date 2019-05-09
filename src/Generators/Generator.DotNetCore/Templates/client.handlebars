@@ -61,48 +61,65 @@ namespace {{ namespace }}
 {{/if}}
     #endregion
 
-    public class {{ mainClientFactoryClassName }}
+    public interface I{{ mainClientFactoryClassName }}
     {
-        private readonly string _url;
-        private readonly bool _usePostResponse;
-
-
-        public {{ mainClientFactoryClassName }}(string url, bool usePostResponse = true)
-        {
-            _url = url;
-            _usePostResponse = usePostResponse;
-        }
-        
 {{#if schema.queryType }}
 {{#with schema.queryType }}
+        IGraphQlQueryClient<{{ resolveDtoName this }}> CreateQueryClient(Action<{{ resolveBuilderName this }}> setupAction);
+{{/with}}
+{{/if}}
+{{#if schema.mutationType }}
+{{#with schema.mutationType }}
 
-        public ClientFactory<{{ resolveDtoName this }}> ForQuery(Action<{{ resolveBuilderName this }}> setupAction)
+        IGraphQlMutationClient<{{ resolveDtoName this }}> CreateMutationClient(Action<{{ resolveBuilderName this }}> setupAction);
+{{/with}}
+{{/if}}
+{{#if schema.subscriptionType }}
+{{#with schema.subscriptionType }}
+
+        IGraphQlSubscriptionClient<{{ resolveDtoName this }}> CreateSubscriptionClient(Action<{{ resolveBuilderName this }}> setupAction);
+{{/with}}
+{{/if}}
+    }
+
+
+    public class {{ mainClientFactoryClassName }} : ClientFactoryBase, I{{ mainClientFactoryClassName }}
+    {
+        public {{ mainClientFactoryClassName }}(string url)
+            : base(url)
+        {
+        }
+
+
+{{#if schema.queryType }}
+{{#with schema.queryType }}
+        public IGraphQlQueryClient<{{ resolveDtoName this }}> CreateQueryClient(Action<{{ resolveBuilderName this }}> setupAction)
         {
             var type = new {{ resolveBuilderName this }}();
             setupAction(type);
-            return new ClientFactory<{{ resolveDtoName this }}>(_url, "query", type, _usePostResponse);
+            return CreateQueryClient<{{ resolveDtoName this }}>(type);
         }
 {{/with}}
 {{/if}}
 {{#if schema.mutationType }}
 {{#with schema.mutationType }}
 
-        public ClientFactory<{{ resolveDtoName this }}> ForMutation(Action<{{ resolveBuilderName this }}> setupAction)
+        public IGraphQlMutationClient<{{ resolveDtoName this }}> CreateMutationClient(Action<{{ resolveBuilderName this }}> setupAction)
         {
             var type = new {{ resolveBuilderName this }}();
             setupAction(type);
-            return new ClientFactory<{{ resolveDtoName this }}>(_url, "mutation", type, _usePostResponse);
+            return CreateMutationClient<{{ resolveDtoName this }}>(type);
         }
 {{/with}}
 {{/if}}
 {{#if schema.subscriptionType }}
 {{#with schema.subscriptionType }}
 
-        public ClientFactory<{{ resolveDtoName this }}> ForSubscription(Action<{{ resolveBuilderName this }}> setupAction)
+        public IGraphQlSubscriptionClient<{{ resolveDtoName this }}> CreateSubscriptionClient(Action<{{ resolveBuilderName this }}> setupAction)
         {
             var type = new {{ resolveBuilderName this }}();
             setupAction(type);
-            return new ClientFactory<{{ resolveDtoName this }}>(_url, "subscription", type, _usePostResponse);
+            return CreateSubscriptionClient<{{ resolveDtoName this }}>(type);
         }
 {{/with}}
 {{/if}}

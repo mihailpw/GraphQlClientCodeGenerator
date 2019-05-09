@@ -4,8 +4,10 @@ namespace {{ namespace }}.Infra
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
+    using System.Threading;
     using System.Threading.Tasks;
     using GraphQL.Client;
+    using GraphQL.Client.Http;
     using GraphQL.Common.Request;
     using GraphQL.Common.Response;
     using Newtonsoft.Json.Linq;
@@ -13,9 +15,27 @@ namespace {{ namespace }}.Infra
 
     #region Client
 
-    public class Response<T>
+    public interface IResponse<out T>
     {
-        private readonly T _data;
+        bool IsCompleted { get; }
+
+        bool IsFailed { get; }
+
+        T Data { get; }
+
+        IReadOnlyList<Error> Errors { get; }
+    }
+
+    public interface ISubscription<T> : IDisposable
+    {
+        event EventHandler<IResponse<T>> Received;
+
+        IResponse<T> LastResponse { get; }
+    }
+
+    public class Response<T> : IResponse<T>
+    {
+        private T _data;
 
 
         public bool IsCompleted { get; }
@@ -33,12 +53,13 @@ namespace {{ namespace }}.Infra
 
                 return _data;
             }
+            protected set => _data = value;
         }
 
         public IReadOnlyList<Error> Errors { get; }
 
 
-        public Response(T data)
+        private Response(T data)
         {
             _data = data;
 
@@ -46,11 +67,64 @@ namespace {{ namespace }}.Infra
             Errors = Array.Empty<Error>();
         }
 
-        public Response(IReadOnlyList<Error> errors)
+        private Response(IReadOnlyList<Error> errors)
         {
             Errors = errors;
 
             IsCompleted = false;
+        }
+
+
+        public static Response<T> CreateFrom(GraphQLResponse graphQlResponse)
+        {
+            if (graphQlResponse == null)
+            {
+                return null;
+            }
+
+            if (graphQlResponse.Errors != null && graphQlResponse.Errors.Length > 0)
+            {
+                var errors = graphQlResponse.Errors.Select(
+                        e => new Error(
+                            e.Message,
+                            e.Locations?.Select(l => new Error.Location(l.Column, l.Line)).ToList(),
+                            e.AdditionalEntries?.ToDictionary(p => p.Key, p => (object)p.Value)))
+                    .ToList();
+
+                return new Response<T>(errors);
+            }
+            else
+            {
+                var jData = (JToken)graphQlResponse.Data;
+                var dto = jData.ToObject<T>();
+
+                return new Response<T>(dto);
+            }
+        }
+    }
+
+    public class Subscription<T> : ISubscription<T>
+    {
+        private readonly IGraphQLSubscriptionResult _graphQlSubscriptionResult;
+
+
+        public event EventHandler<IResponse<T>> Received;
+
+
+        public IResponse<T> LastResponse { get; }
+
+
+        public Subscription(IGraphQLSubscriptionResult graphQlSubscriptionResult)
+        {
+            _graphQlSubscriptionResult = graphQlSubscriptionResult;
+            _graphQlSubscriptionResult.OnReceive += r => Received?.Invoke(this, Response<T>.CreateFrom(r));
+            LastResponse = Response<T>.CreateFrom(graphQlSubscriptionResult.LastResponse);
+        }
+
+
+        public void Dispose()
+        {
+            _graphQlSubscriptionResult?.Dispose();
         }
     }
 
@@ -90,30 +164,47 @@ namespace {{ namespace }}.Infra
         }
     }
 
-    public interface IGraphQlClient
+    public interface IGraphQlQueryClient : IDisposable
     {
-        Task<Response<TDto>> RequestAsync<TDto>();
+        Task<IResponse<TDto>> SendAsync<TDto>(CancellationToken cancellationToken = default);
     }
 
-    public interface IGraphQlClient<TDto> : IGraphQlClient
+    public interface IGraphQlQueryClient<TDto> : IGraphQlQueryClient
     {
-        Task<Response<TDto>> RequestAsync();
+        Task<IResponse<TDto>> SendAsync(CancellationToken cancellationToken = default);
     }
 
-    public class GraphQlClient : IGraphQlClient
+    public interface IGraphQlMutationClient : IDisposable
     {
-        private readonly bool _usePostResponse;
+        Task<IResponse<TDto>> SendAsync<TDto>(CancellationToken cancellationToken = default);
+    }
 
-        private readonly GraphQLClient _client;
-        private readonly GraphQLRequest _request;
+    public interface IGraphQlMutationClient<TDto> : IGraphQlMutationClient
+    {
+        Task<IResponse<TDto>> SendAsync(CancellationToken cancellationToken = default);
+    }
+
+    public interface IGraphQlSubscriptionClient : IDisposable
+    {
+        Task<ISubscription<TDto>> SendAsync<TDto>(CancellationToken cancellationToken = default);
+    }
+
+    public interface IGraphQlSubscriptionClient<TDto> : IGraphQlSubscriptionClient
+    {
+        Task<ISubscription<TDto>> SendAsync(CancellationToken cancellationToken = default);
+    }
+
+    public abstract class GraphQlClientBase : IDisposable
+    {
+        protected GraphQLHttpClient Client { get; }
+
+        protected GraphQLRequest Request { get; }
 
 
-        public GraphQlClient(string url, string query, Dictionary<string, object> variables, bool usePostResponse)
+        protected GraphQlClientBase(string url, string query, Dictionary<string, object> variables)
         {
-            _usePostResponse = usePostResponse;
-
-            _client = new GraphQLClient(url);
-            _request = new GraphQLRequest
+            Client = new GraphQLHttpClient(url);
+            Request = new GraphQLRequest
             {
                 Query = query,
                 Variables = variables,
@@ -121,91 +212,119 @@ namespace {{ namespace }}.Infra
         }
 
 
-        public async Task<Response<TDto>> RequestAsync<TDto>()
+        public void Dispose()
         {
-            var graphQlResponse = await SendAsync();
-            var response = ProcessResponse<TDto>(graphQlResponse);
+            Client.Dispose();
+        }
+    }
+
+    public class GraphQlQueryClient<TDto> : GraphQlClientBase, IGraphQlQueryClient<TDto>
+    {
+        public GraphQlQueryClient(string url, string query, Dictionary<string, object> variables)
+            : base(url, query, variables)
+        {
+        }
+
+
+        public Task<IResponse<TDto>> SendAsync(CancellationToken cancellationToken)
+        {
+            return SendAsync<TDto>(cancellationToken);
+        }
+
+        public async Task<IResponse<T>> SendAsync<T>(CancellationToken cancellationToken)
+        {
+            var graphQlResponse = await Client.SendQueryAsync(Request, cancellationToken);
+            var response = Response<T>.CreateFrom(graphQlResponse);
 
             return response;
         }
-
-
-        private async Task<GraphQLResponse> SendAsync()
-        {
-            return _usePostResponse
-                ? await _client.PostAsync(_request)
-                : await _client.GetAsync(_request);
-        }
-
-        private static Response<TDto> ProcessResponse<TDto>(GraphQLResponse graphQlResponse)
-        {
-            if (graphQlResponse.Errors != null && graphQlResponse.Errors.Length > 0)
-            {
-                var errors = graphQlResponse.Errors.Select(
-                        e => new Error(
-                            e.Message,
-                            e.Locations?.Select(l => new Error.Location(l.Column, l.Line)).ToList(),
-                            e.AdditonalEntries?.ToDictionary(p => p.Key, p => (object)p.Value)))
-                    .ToList();
-
-                return new Response<TDto>(errors);
-            }
-
-            var jData = (JToken)graphQlResponse.Data;
-            var dto = jData.ToObject<TDto>();
-
-            return new Response<TDto>(dto);
-        }
     }
 
-    public class GraphQlClient<T> : GraphQlClient, IGraphQlClient<T>
+    public class GraphQlMutationClient<TDto> : GraphQlClientBase, IGraphQlMutationClient<TDto>
     {
-        public GraphQlClient(
-            string url,
-            string query,
-            Dictionary<string, object> variables,
-            bool usePostResponse)
-            : base(url, query, variables, usePostResponse)
+        public GraphQlMutationClient(string url, string query, Dictionary<string, object> variables)
+            : base(url, query, variables)
         {
         }
 
 
-        public async Task<Response<T>> RequestAsync()
+        public Task<IResponse<TDto>> SendAsync(CancellationToken cancellationToken)
         {
-            return await RequestAsync<T>();
+            return SendAsync<TDto>(cancellationToken);
+        }
+
+        public async Task<IResponse<T>> SendAsync<T>(CancellationToken cancellationToken)
+        {
+            var graphQlResponse = await Client.SendMutationAsync(Request, cancellationToken);
+            var response = Response<T>.CreateFrom(graphQlResponse);
+
+            return response;
         }
     }
 
-    public class ClientFactory<TDto>
+    public class GraphQlSubscriptionClient<TDto> : GraphQlClientBase, IGraphQlSubscriptionClient<TDto>
+    {
+        public GraphQlSubscriptionClient(string url, string query, Dictionary<string, object> variables)
+            : base(url, query, variables)
+        {
+        }
+
+        public Task<ISubscription<TDto>> SendAsync(CancellationToken cancellationToken)
+        {
+            return SendAsync<TDto>(cancellationToken);
+        }
+        
+        public async Task<ISubscription<T>> SendAsync<T>(CancellationToken cancellationToken)
+        {
+            var graphQlSubscriptionResult = await Client.SendSubscribeAsync(Request, cancellationToken);
+            var subscription = new Subscription<T>(graphQlSubscriptionResult);
+
+            return subscription;
+        }
+    }
+
+    public abstract class ClientFactoryBase
     {
         private readonly string _url;
-        private readonly string _requestType;
-        private readonly TypeBase _type;
-        private readonly bool _usePostResponse;
 
 
-        public ClientFactory(string url, string requestType, TypeBase type, bool usePostResponse)
+        protected ClientFactoryBase(string url)
         {
             _url = url;
-            _requestType = requestType;
-            _type = type;
-            _usePostResponse = usePostResponse;
         }
 
 
-        public IGraphQlClient<TDto> CreateClient()
+        protected IGraphQlQueryClient<TDto> CreateQueryClient<TDto>(TypeBase type)
         {
-            var arguments = ((IArgumentsProvider)_type).GetArguments().ToList();
-            var query = BuildQuery(arguments);
+            var (requestQuery, variables) = GetRequestData("query", type);
+            return new GraphQlQueryClient<TDto>(_url, requestQuery, variables);
+        }
+
+        protected IGraphQlMutationClient<TDto> CreateMutationClient<TDto>(TypeBase type)
+        {
+            var (requestQuery, variables) = GetRequestData("mutation", type);
+            return new GraphQlMutationClient<TDto>(_url, requestQuery, variables);
+        }
+
+        protected IGraphQlSubscriptionClient<TDto> CreateSubscriptionClient<TDto>(TypeBase type)
+        {
+            var (requestQuery, variables) = GetRequestData("subscription", type);
+            return new GraphQlSubscriptionClient<TDto>(_url, requestQuery, variables);
+        }
+
+
+        private static (string requestQuery, Dictionary<string, object> variables) GetRequestData(string requestType, TypeBase type)
+        {
+            var arguments = ((IArgumentsProvider) type).GetArguments().ToList();
+            var requestQuery = BuildQuery(requestType, type, arguments);
             var variables = arguments.ToDictionary(a => a.Id, a => a.Value);
 
-            return new GraphQlClient<TDto>(_url, query, variables, _usePostResponse);
+            return (requestQuery, variables);
         }
 
-
-        private string BuildQuery(List<Argument> arguments)
+        private static string BuildQuery(string requestType, IRequestBuilder requestBuilder, IReadOnlyCollection<Argument> arguments)
         {
-            var stringBuilder = new StringBuilder(_requestType);
+            var stringBuilder = new StringBuilder(requestType);
 
             if (arguments.Count > 0)
             {
@@ -219,7 +338,7 @@ namespace {{ namespace }}.Infra
             }
 
             stringBuilder.Append("{");
-            ((IRequestBuilder)_type).AppendRequest(stringBuilder);
+            requestBuilder.AppendRequest(stringBuilder);
             stringBuilder.Append("}");
 
             return stringBuilder.ToString();
