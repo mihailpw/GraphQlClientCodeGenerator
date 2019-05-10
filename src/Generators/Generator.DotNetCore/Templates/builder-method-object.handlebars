@@ -1,4 +1,4 @@
-        public Func<Action<{{ resolveBuilderName type }}>, {{ resolveBuilderName ../../ }}> {{ toPascal name }}({{> builder-method-args}})
+        public Func<Action<{{ resolveBuilderName type }}>, {{ resolveBuilderName ../../ }}> {{ toPascal name }}({{#with args}}{{> builder-method-args }}{{/with}})
     {{/if}}
         {
             IncludingField("{{ name }}");

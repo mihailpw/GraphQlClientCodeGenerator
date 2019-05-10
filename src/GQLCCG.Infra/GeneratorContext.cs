@@ -12,6 +12,8 @@ namespace GQLCCG.Infra
 
         public bool GenerateDocs { get; set; } = false;
 
+        public bool GenerateInputObjectConstructor { get; set; } = false;
+
         public TypeNames TypeTrims { get; } = new TypeNames
         {
             Enum = "",

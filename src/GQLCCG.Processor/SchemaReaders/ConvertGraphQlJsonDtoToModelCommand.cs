@@ -308,6 +308,17 @@ namespace GQLCCG.Processor.SchemaReaders
 
                 typesHolder.PossibleFields = possibleFields.ToList();
             }
+            IList<GraphQlInputValue> SortNonNullFirst(IEnumerable<GraphQlInputValue> values)
+            {
+                return values.OrderBy(v => !(v.Type is GraphQlNonNullType)).ToList();
+            }
+            void SortNonNullFirstInFields(IEnumerable<GraphQlField> fields)
+            {
+                foreach (var field in fields)
+                {
+                    field.Args = SortNonNullFirst(field.Args);
+                }
+            }
 
             foreach (var type in types)
             {
@@ -320,12 +331,15 @@ namespace GQLCCG.Processor.SchemaReaders
                         break;
                     case GraphQlInputObjectType inputObjectType:
                         SetOwnerToInputValues(inputObjectType, inputObjectType.InputFields);
+                        inputObjectType.InputFields = SortNonNullFirst(inputObjectType.InputFields);
                         break;
                     case GraphQlInterfaceType interfaceType:
                         SetOwnerToFields(interfaceType, interfaceType.Fields);
+                        SortNonNullFirstInFields(interfaceType.Fields);
                         break;
                     case GraphQlObjectType objectType:
                         SetOwnerToFields(objectType, objectType.Fields);
+                        SortNonNullFirstInFields(objectType.Fields);
                         break;
                 }
             }

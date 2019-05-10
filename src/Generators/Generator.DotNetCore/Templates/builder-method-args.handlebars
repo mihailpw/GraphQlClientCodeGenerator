@@ -1,6 +1,7 @@
-{{#if args }}
+{{#if this }}
 
-    {{#each args }}
-            {{{ resolveDtoName type }}} {{ name }}{{{ resolveDefaultValue this " = {0}" }}}{{#unless @last}},{{/unless~}}
+    {{#each this }}
+            {{{ resolveDtoName type }}} {{ name }}{{{ resolveDefaultValue this " = {0}" }}}{{#unless @last}},
+            {{/unless~}}
     {{/each}}
 {{/if}}

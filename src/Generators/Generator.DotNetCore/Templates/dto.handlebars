@@ -43,4 +43,16 @@
     {{/withDocs}}
         public {{{ resolveDtoName type }}} {{ toPascal name }} { get; set; }
 {{/each}}
+{{#if @root.generateInputObjectConstructor }}
+{{#if inputFields }}
+
+
+        public {{{ resolveDtoName this }}}({{#with inputFields }}{{> builder-method-args }}{{/with}})
+        {
+    {{#each inputFields }}
+            {{ toPascal name }} = {{{ name }}};
+    {{/each}}
+        }
+{{/if}}
+{{/if}}
     }

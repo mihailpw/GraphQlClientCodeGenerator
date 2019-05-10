@@ -1,4 +1,4 @@
-        public {{ resolveBuilderName ../../ }} {{ toPascal name }}({{> builder-method-args}})
+        public {{ resolveBuilderName ../../ }} {{ toPascal name }}({{#with args}}{{> builder-method-args }}{{/with}})
         {
             IncludeField(
                 "{{ name }}",

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Generator.DotNetCore.Helpers;
@@ -81,6 +82,10 @@ namespace Generator.DotNetCore.Infra
             Handlebars.RegisterHelper(
                 "toPascal",
                 (output, _, args) => output.Write(args.ResolveArgument<string>().ToPascal()));
+
+            Handlebars.RegisterHelper(
+                "debug",
+                (output, _, args) => Debugger.Break());
         }
 
 
