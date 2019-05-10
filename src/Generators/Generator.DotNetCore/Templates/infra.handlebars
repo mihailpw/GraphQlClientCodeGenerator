@@ -1,4 +1,4 @@
-namespace {{ namespace }}.Infra
+namespace GraphQlClient.Infra
 {
     using System;
     using System.Collections.Generic;
@@ -273,7 +273,7 @@ namespace {{ namespace }}.Infra
         {
             return SendAsync<TDto>(cancellationToken);
         }
-        
+
         public async Task<ISubscription<T>> SendAsync<T>(CancellationToken cancellationToken)
         {
             var graphQlSubscriptionResult = await Client.SendSubscribeAsync(Request, cancellationToken);
@@ -296,25 +296,27 @@ namespace {{ namespace }}.Infra
 
         protected IGraphQlQueryClient<TDto> CreateQueryClient<TDto>(TypeBase type)
         {
-            var (requestQuery, variables) = GetRequestData("query", type);
+            var (requestQuery, variables) = PrepareRequestData("query", type);
             return new GraphQlQueryClient<TDto>(_url, requestQuery, variables);
         }
 
         protected IGraphQlMutationClient<TDto> CreateMutationClient<TDto>(TypeBase type)
         {
-            var (requestQuery, variables) = GetRequestData("mutation", type);
+            var (requestQuery, variables) = PrepareRequestData("mutation", type);
             return new GraphQlMutationClient<TDto>(_url, requestQuery, variables);
         }
 
         protected IGraphQlSubscriptionClient<TDto> CreateSubscriptionClient<TDto>(TypeBase type)
         {
-            var (requestQuery, variables) = GetRequestData("subscription", type);
+            var (requestQuery, variables) = PrepareRequestData("subscription", type);
             return new GraphQlSubscriptionClient<TDto>(_url, requestQuery, variables);
         }
 
 
-        private static (string requestQuery, Dictionary<string, object> variables) GetRequestData(string requestType, TypeBase type)
+        private static (string requestQuery, Dictionary<string, object> variables) PrepareRequestData(string requestType, TypeBase type)
         {
+            ((ITypeValidator) type).ThrowIfNotValid();
+
             var arguments = ((IArgumentsProvider) type).GetArguments().ToList();
             var requestQuery = BuildQuery(requestType, type, arguments);
             var variables = arguments.ToDictionary(a => a.Id, a => a.Value);
@@ -362,6 +364,11 @@ namespace {{ namespace }}.Infra
     public interface IRequestBuilder
     {
         void AppendRequest(StringBuilder builder);
+    }
+
+    public interface ITypeValidator
+    {
+        void ThrowIfNotValid();
     }
 
     #endregion
@@ -438,7 +445,7 @@ namespace {{ namespace }}.Infra
         }
     }
 
-    public abstract class FieldBase : IRequestBuilder, IArgumentsProvider
+    public abstract class FieldBase : IRequestBuilder, IArgumentsProvider, ITypeValidator
     {
         private readonly string _key;
 
@@ -472,6 +479,11 @@ namespace {{ namespace }}.Infra
             return GetArguments();
         }
 
+        void ITypeValidator.ThrowIfNotValid()
+        {
+            ((ITypeValidator) Type)?.ThrowIfNotValid();
+        }
+
 
         protected abstract void AppendArguments(StringBuilder builder);
 
@@ -487,10 +499,11 @@ namespace {{ namespace }}.Infra
 
     #region Types
 
-    public abstract class TypeBase : IRequestBuilder, IArgumentsProvider, INameProvider
+    public abstract class TypeBase : IRequestBuilder, IArgumentsProvider, INameProvider, ITypeValidator
     {
         private readonly string _name;
         private readonly List<FieldBase> _fields;
+        private readonly List<string> _includingFieldNames;
 
 
         string INameProvider.Name => _name;
@@ -500,6 +513,7 @@ namespace {{ namespace }}.Infra
         {
             _name = name;
             _fields = new List<FieldBase>();
+            _includingFieldNames = new List<string>();
         }
 
 
@@ -531,9 +545,31 @@ namespace {{ namespace }}.Infra
             }
         }
 
+        void ITypeValidator.ThrowIfNotValid()
+        {
+            if (_includingFieldNames.Count > 0)
+            {
+                throw new InvalidOperationException($"Following fields from '{GetType().Name}' not setup: {string.Join(", ", _includingFieldNames)}");
+            }
+
+            foreach (var field in _fields)
+            {
+                if (field is ITypeValidator typeValidator)
+                {
+                    typeValidator.ThrowIfNotValid();
+                }
+            }
+        }
+
+
+        protected void IncludingField(string fieldName)
+        {
+            _includingFieldNames.Add(fieldName);
+        }
 
         protected void IncludeField(string fieldName, List<Argument> arguments, TypeBase type)
         {
+            _includingFieldNames.Remove(fieldName);
             _fields.Add(new Field(fieldName, arguments, type));
         }
 
