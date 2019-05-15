@@ -21,17 +21,27 @@ namespace Generator.DotNetCore.Helpers
 
         public static (TFirst first, TSecond second) ResolveArguments<TFirst, TSecond>(this object[] arguments)
         {
-            if (arguments.Length != 2)
+            var first = arguments.ElementAtOrDefault(0);
+            var second = arguments.ElementAtOrDefault(1);
+
+            if (!(first is TFirst firstValue))
             {
-                throw new InvalidOperationException("Should be 2 arguments.");
+                if (first != null)
+                {
+                    throw new InvalidOperationException($"First parameter should be {typeof(TFirst).Name} object.");
+                }
+
+                firstValue = default(TFirst);
             }
-            if (!(arguments[0] is TFirst firstValue))
+
+            if (!(second is TSecond secondValue))
             {
-                throw new InvalidOperationException($"First parameter should be {typeof(TFirst).Name} object.");
-            }
-            if (!(arguments[1] is TSecond secondValue))
-            {
-                throw new InvalidOperationException($"Second parameter should be {typeof(TSecond).Name} object.");
+                if (second != null)
+                {
+                    throw new InvalidOperationException($"Second parameter should be {typeof(TSecond).Name} object.");
+                }
+
+                secondValue = default(TSecond);
             }
 
             return (firstValue, secondValue);
@@ -39,9 +49,9 @@ namespace Generator.DotNetCore.Helpers
 
         public static (TFirst first, TSecond[] second) ResolveArgumentsInfinity<TFirst, TSecond>(this object[] arguments)
         {
-            if (arguments.Length < 2)
+            if (arguments.Length < 1)
             {
-                throw new InvalidOperationException("Should be at list 2 arguments.");
+                throw new InvalidOperationException("Should be at list 1 arguments.");
             }
             if (!(arguments[0] is TFirst firstValue))
             {

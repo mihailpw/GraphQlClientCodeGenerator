@@ -18,46 +18,56 @@ namespace Generator.DotNetCore.Helpers
         }
 
 
-        [AutoWire]
-        public string ResolveDtoName(GraphQlTypeBase type)
+        public string ResolveDtoName(GraphQlTypeBase type, bool withNullable)
         {
-            switch (type)
+            string Resolve(GraphQlTypeBase typeInternal, bool withNullableInternal, int level)
             {
-                case GraphQlListType listType:
-                    return $"List<{ResolveDtoName(listType.OfType)}>";
-                case GraphQlNonNullType nonNullType:
-                    return ResolveDtoName(nonNullType.OfType);
-                case GraphQlScalarType scalarType:
-                    switch (scalarType.Type)
-                    {
-                        case ScalarTypes.String:
-                            return "string";
-                        case ScalarTypes.Boolean:
-                            return "bool?";
-                        case ScalarTypes.Float:
-                            return "float?";
-                        case ScalarTypes.Int:
-                            return "int?";
-                        case ScalarTypes.Id:
-                            return "string";
-                        case ScalarTypes.Date:
-                            return "DateTime?";
-                        case ScalarTypes.DateTime:
-                            return "DateTime?";
-                        case ScalarTypes.DateTimeOffset:
-                            return "DateTimeOffset?";
-                        case ScalarTypes.Seconds:
-                            return "long?";
-                        case ScalarTypes.Milliseconds:
-                            return "long?";
-                        case ScalarTypes.Decimal:
-                            return "decimal?";
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(scalarType.Type), scalarType.Type, null);
-                    }
-                default:
-                    return $"{type.Name}Dto";
+                var nullableSign = withNullableInternal && level == 0
+                    ? "?"
+                    : string.Empty;
+
+                switch (typeInternal)
+                {
+                    case GraphQlListType listType:
+                        return $"List<{Resolve(listType.OfType, withNullableInternal, level + 1)}>";
+                    case GraphQlNonNullType nonNullType:
+                        return Resolve(nonNullType.OfType, withNullableInternal, level + 1);
+                    case GraphQlEnumType enumType:
+                        return $"{enumType.Name}{nullableSign}";
+                    case GraphQlScalarType scalarType:
+                        switch (scalarType.Type)
+                        {
+                            case ScalarTypes.String:
+                                return "string";
+                            case ScalarTypes.Boolean:
+                                return $"bool{nullableSign}";
+                            case ScalarTypes.Float:
+                                return $"float{nullableSign}";
+                            case ScalarTypes.Int:
+                                return $"int{nullableSign}";
+                            case ScalarTypes.Id:
+                                return "string";
+                            case ScalarTypes.Date:
+                                return $"DateTime{nullableSign}";
+                            case ScalarTypes.DateTime:
+                                return $"DateTime{nullableSign}";
+                            case ScalarTypes.DateTimeOffset:
+                                return $"DateTimeOffset{nullableSign}";
+                            case ScalarTypes.Seconds:
+                                return $"long{nullableSign}";
+                            case ScalarTypes.Milliseconds:
+                                return $"long{nullableSign}";
+                            case ScalarTypes.Decimal:
+                                return $"decimal{nullableSign}";
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(scalarType.Type), scalarType.Type, null);
+                        }
+                    default:
+                        return $"{typeInternal.Name}Dto";
+                }
             }
+
+            return Resolve(type, withNullable, 0);
         }
 
         [AutoWire]
@@ -91,8 +101,6 @@ namespace Generator.DotNetCore.Helpers
                 case GraphQlObjectType _:
                 case GraphQlUnionType _:
                     return $"{type.Name}Builder";
-                case GraphQlScalarType scalarType:
-                    return ResolveDtoName(scalarType);
                 default:
                     throw new InvalidOperationException("Can not be a builder.");
             }
