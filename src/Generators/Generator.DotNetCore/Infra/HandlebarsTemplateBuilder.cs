@@ -51,11 +51,19 @@ namespace Generator.DotNetCore.Infra
             }
 
             Handlebars.RegisterHelper(
+                "resolveDtoName",
+                (output, _, args) =>
+                {
+                    var (first, second) = args.ResolveArguments<GraphQlTypeBase, string>();
+                    output.Write(typeHelper.ResolveDtoName(first, second == "true"));
+                });
+
+            Handlebars.RegisterHelper(
                 "ifKind",
                 (output, opt, ctx, args) =>
                 {
-                    var resolvedArgs = args.ResolveArgumentsInfinity<GraphQlTypeBase, string>();
-                    if (typeHelper.IfKind(resolvedArgs.first, resolvedArgs.second))
+                    var (first, second) = args.ResolveArgumentsInfinity<GraphQlTypeBase, string>();
+                    if (typeHelper.IfKind(first, second))
                     {
                         opt.Template(output, ctx);
                     }
