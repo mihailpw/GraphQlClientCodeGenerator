@@ -10,6 +10,8 @@ namespace GraphQlClient.Infra
     using GraphQL.Client.Http;
     using GraphQL.Common.Request;
     using GraphQL.Common.Response;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
     using Newtonsoft.Json.Linq;
 
 
@@ -196,14 +198,32 @@ namespace GraphQlClient.Infra
 
     public abstract class GraphQlClientBase : IDisposable
     {
+        private static readonly JsonSerializerSettings DefaultJsonSerializerSettings;
+
+
         protected GraphQLHttpClient Client { get; }
 
         protected GraphQLRequest Request { get; }
 
 
-        protected GraphQlClientBase(string url, string query, Dictionary<string, object> variables)
+        static GraphQlClientBase()
         {
-            Client = new GraphQLHttpClient(url);
+            DefaultJsonSerializerSettings = new JsonSerializerSettings();
+            DefaultJsonSerializerSettings.Converters.Add(new StringEnumConverter());
+        }
+
+
+        protected GraphQlClientBase(
+            string url,
+            string query,
+            Dictionary<string, object> variables,
+            JsonSerializerSettings jsonSerializerSettings = null)
+        {
+            Client = new GraphQLHttpClient(new GraphQLHttpClientOptions
+            {
+                EndPoint = new Uri(url),
+                JsonSerializerSettings = jsonSerializerSettings ?? DefaultJsonSerializerSettings,
+            });
             Request = new GraphQLRequest
             {
                 Query = query,
@@ -220,8 +240,12 @@ namespace GraphQlClient.Infra
 
     public class GraphQlQueryClient<TDto> : GraphQlClientBase, IGraphQlQueryClient<TDto>
     {
-        public GraphQlQueryClient(string url, string query, Dictionary<string, object> variables)
-            : base(url, query, variables)
+        public GraphQlQueryClient(
+            string url,
+            string query,
+            Dictionary<string, object> variables,
+            JsonSerializerSettings jsonSerializerSettings = null)
+            : base(url, query, variables, jsonSerializerSettings)
         {
         }
 
@@ -242,8 +266,12 @@ namespace GraphQlClient.Infra
 
     public class GraphQlMutationClient<TDto> : GraphQlClientBase, IGraphQlMutationClient<TDto>
     {
-        public GraphQlMutationClient(string url, string query, Dictionary<string, object> variables)
-            : base(url, query, variables)
+        public GraphQlMutationClient(
+            string url,
+            string query,
+            Dictionary<string, object> variables,
+            JsonSerializerSettings jsonSerializerSettings = null)
+            : base(url, query, variables, jsonSerializerSettings)
         {
         }
 
@@ -264,8 +292,12 @@ namespace GraphQlClient.Infra
 
     public class GraphQlSubscriptionClient<TDto> : GraphQlClientBase, IGraphQlSubscriptionClient<TDto>
     {
-        public GraphQlSubscriptionClient(string url, string query, Dictionary<string, object> variables)
-            : base(url, query, variables)
+        public GraphQlSubscriptionClient(
+            string url,
+            string query,
+            Dictionary<string, object> variables,
+            JsonSerializerSettings jsonSerializerSettings = null)
+            : base(url, query, variables, jsonSerializerSettings)
         {
         }
 
@@ -286,38 +318,40 @@ namespace GraphQlClient.Infra
     public abstract class ClientFactoryBase
     {
         private readonly string _url;
+        private readonly JsonSerializerSettings _jsonSerializerSettings;
 
 
-        protected ClientFactoryBase(string url)
+        protected ClientFactoryBase(string url, JsonSerializerSettings jsonSerializerSettings = null)
         {
             _url = url;
+            _jsonSerializerSettings = jsonSerializerSettings;
         }
 
 
         protected IGraphQlQueryClient<TDto> CreateQueryClient<TDto>(TypeBase type)
         {
             var (requestQuery, variables) = PrepareRequestData("query", type);
-            return new GraphQlQueryClient<TDto>(_url, requestQuery, variables);
+            return new GraphQlQueryClient<TDto>(_url, requestQuery, variables, _jsonSerializerSettings);
         }
 
         protected IGraphQlMutationClient<TDto> CreateMutationClient<TDto>(TypeBase type)
         {
             var (requestQuery, variables) = PrepareRequestData("mutation", type);
-            return new GraphQlMutationClient<TDto>(_url, requestQuery, variables);
+            return new GraphQlMutationClient<TDto>(_url, requestQuery, variables, _jsonSerializerSettings);
         }
 
         protected IGraphQlSubscriptionClient<TDto> CreateSubscriptionClient<TDto>(TypeBase type)
         {
             var (requestQuery, variables) = PrepareRequestData("subscription", type);
-            return new GraphQlSubscriptionClient<TDto>(_url, requestQuery, variables);
+            return new GraphQlSubscriptionClient<TDto>(_url, requestQuery, variables, _jsonSerializerSettings);
         }
 
 
         private static (string requestQuery, Dictionary<string, object> variables) PrepareRequestData(string requestType, TypeBase type)
         {
-            ((ITypeValidator) type).ThrowIfNotValid();
+            ((ITypeValidator)type).ThrowIfNotValid();
 
-            var arguments = ((IArgumentsProvider) type).GetArguments().ToList();
+            var arguments = ((IArgumentsProvider)type).GetArguments().ToList();
             var requestQuery = BuildQuery(requestType, type, arguments);
             var variables = arguments.ToDictionary(a => a.Id, a => a.Value);
 
@@ -481,7 +515,7 @@ namespace GraphQlClient.Infra
 
         void ITypeValidator.ThrowIfNotValid()
         {
-            ((ITypeValidator) Type)?.ThrowIfNotValid();
+            ((ITypeValidator)Type)?.ThrowIfNotValid();
         }
 
 
