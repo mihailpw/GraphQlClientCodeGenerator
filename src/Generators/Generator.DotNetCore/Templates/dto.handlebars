@@ -1,6 +1,4 @@
-
 {{#ifKind this "object" "interface" "union" }}
-{{ debug fields }}
     {{#withDocs}}
     /// <summary>
         {{#if description}}
@@ -19,7 +17,7 @@
         /// </summary>
             {{/if}}
         {{/withDocs}}
-        public {{{ resolveDtoName type }}} {{ toPascal name }} { get; set; }
+        public {{{ resolveDtoName type "true" }}} {{ toPascal name }} { get; set; }
     {{/each}}
     {{#each possibleFields }}
         {{#withDocs}}
@@ -30,10 +28,11 @@
         /// Extension: <see cref="{{ resolveDtoName ownerType }}.{{ toPascal name }}" />.
         /// </summary>
         {{/withDocs}}
-        public {{{ resolveDtoName type }}} {{ toPascal name }} { get; set; }
+        public {{{ resolveDtoName type "true" }}} {{ toPascal name }} { get; set; }
     {{/each}}
     }
-{{else ifKind this "inputObject" }}
+{{/ifKind}}
+{{#ifKind this "inputObject" }}
     {{#withDocs}}
         {{#if description}}
     /// <summary>
@@ -51,7 +50,7 @@
         /// </summary>
             {{/if}}
         {{/withDocs}}
-        public {{{ resolveDtoName type }}} {{ toPascal name }} { get; set; }{{{ resolveDefaultValue this " = {0};" }}}
+        public {{{ resolveDtoName type "true" }}} {{ toPascal name }} { get; set; }{{{ resolveDefaultValue this " = {0};" }}}
     {{/each}}
     {{#if @root.generateInputObjectConstructor }}
 
@@ -64,7 +63,8 @@
         }
     {{/if}}
     }
-{{else ifKind this "enum"}}
+{{/ifKind}}
+{{#ifKind this "enum"}}
     {{#withDocs}}
         {{#if description}}
     /// <summary>
@@ -75,7 +75,14 @@
     public enum {{ resolveDtoName this }}
     {
     {{#each enumValues }}
-        [Display(Name = "{{name}}")]
+        {{#withDocs}}
+            {{#if description}}
+        /// <summary>
+        /// {{ description }}.
+        /// </summary>
+            {{/if}}
+        {{/withDocs}}
+        [EnumMember(Value = "{{name}}")]
         {{ toPascal name}},
     {{/each}}
     }

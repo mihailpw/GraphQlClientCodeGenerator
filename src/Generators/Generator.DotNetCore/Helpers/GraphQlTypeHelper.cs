@@ -20,9 +20,9 @@ namespace Generator.DotNetCore.Helpers
 
         public string ResolveDtoName(GraphQlTypeBase type, bool withNullable)
         {
-            string Resolve(GraphQlTypeBase typeInternal, bool withNullableInternal, int level)
+            string Resolve(GraphQlTypeBase typeInternal, bool withNullableInternal, int level, bool forceNull = false)
             {
-                var nullableSign = withNullableInternal && level == 0
+                var nullableSign = forceNull || withNullableInternal && level == 0
                     ? "?"
                     : string.Empty;
 
@@ -31,7 +31,7 @@ namespace Generator.DotNetCore.Helpers
                     case GraphQlListType listType:
                         return $"List<{Resolve(listType.OfType, withNullableInternal, level + 1)}>";
                     case GraphQlNonNullType nonNullType:
-                        return Resolve(nonNullType.OfType, withNullableInternal, level + 1);
+                        return Resolve(nonNullType.OfType, withNullableInternal, level + 1, forceNull: true);
                     case GraphQlEnumType enumType:
                         return $"{enumType.Name}{nullableSign}";
                     case GraphQlScalarType scalarType:

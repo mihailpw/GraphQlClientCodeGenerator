@@ -2,10 +2,10 @@
     {{/if}}
         {
             IncludingField("{{ name }}");
-            return a =>
+            return __ =>
             {
-                var type = new {{ resolveBuilderName type }}();
-                a(type);
+                var _ = new {{ resolveBuilderName type }}();
+                __(_);
                 IncludeField(
                     "{{ name }}",
     {{#if args }}
@@ -18,7 +18,7 @@
     {{else}}
                     new List<Argument>(0),
     {{/if}}
-                    type);
+                    _);
                 return this;
             };
         }
