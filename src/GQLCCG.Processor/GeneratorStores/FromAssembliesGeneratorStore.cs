@@ -1,23 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using GQLCCG.Infra;
-using GQLCCG.Infra.Utils;
 
 namespace GQLCCG.Processor.GeneratorStores
 {
-    public sealed class FromDirGeneratorStore : IGeneratorStore
+    public class FromAssembliesGeneratorStore : IGeneratorStore
     {
         private readonly Dictionary<string, IGenerator> _generators;
 
 
-        public FromDirGeneratorStore(string dirPath)
+        public FromAssembliesGeneratorStore(IEnumerable<Assembly> assemblies)
         {
-            dirPath.VerifyNotNull(nameof(dirPath));
-
-            _generators = FindAllGenerators(dirPath);
+            _generators = FindAllGenerators(assemblies);
         }
 
 
@@ -32,21 +28,16 @@ namespace GQLCCG.Processor.GeneratorStores
         }
 
 
-        private static Dictionary<string, IGenerator> FindAllGenerators(string dirPath)
+        private static Dictionary<string, IGenerator> FindAllGenerators(IEnumerable<Assembly> assemblies)
         {
-            return Directory
-                .GetFiles(dirPath, "generator.*.dll")
-                .Select(Assembly.LoadFrom)
+            return assemblies
                 .SelectMany(a => a.DefinedTypes)
                 .Where(t =>
                     t.CustomAttributes.Count(a => a.AttributeType == typeof(GeneratorAttribute)) == 1
                     && t.ImplementedInterfaces.Contains(typeof(IGenerator)))
-                .Select(t => new
-                {
-                    name = t.GetCustomAttribute<GeneratorAttribute>().Name,
-                    generator = (IGenerator) Activator.CreateInstance(t)
-                })
-                .ToDictionary(g => g.name, g => g.generator);
+                .ToDictionary(
+                    t => t.GetCustomAttribute<GeneratorAttribute>().Name,
+                    t => (IGenerator) Activator.CreateInstance(t));
         }
     }
 }

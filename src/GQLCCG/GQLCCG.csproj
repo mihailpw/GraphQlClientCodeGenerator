@@ -11,12 +11,10 @@
 
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.4.3" />
-
-    <!-- TODO remove Handlebars.Net -->
-    <PackageReference Include="Handlebars.Net" Version="1.10.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Generators\Generator.DotNetCore\Generator.DotNetCore.csproj" />
     <ProjectReference Include="..\GQLCCG.Processor\GQLCCG.Processor.csproj" />
   </ItemGroup>
 
