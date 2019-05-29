@@ -1,6 +1,6 @@
 ﻿using System;
-using System.IO;
 using System.Threading.Tasks;
+using Generator.DotNetCore;
 using GQLCCG.Infra;
 using GQLCCG.Processor;
 using GQLCCG.Processor.GeneratorStores;
@@ -13,9 +13,10 @@ namespace GQLCCG
     {
         public static async Task GenerateClientAsync(ConsoleOptions options)
         {
-            var currentDir = Directory.GetCurrentDirectory();
-
-            var storage = new FromDirGeneratorStore(currentDir);
+            var storage = new FromAssembliesGeneratorStore(new []
+            {
+                typeof(DotNetCoreGenerator).Assembly,
+            });
             var schemaLoader = new FromUrlSchemaReader(options.SchemaUri, options.InnerLevelOfType);
             var writer = new TextGeneratorWriterFactory(Console.Out);
 

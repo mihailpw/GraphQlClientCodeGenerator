@@ -36,8 +36,4 @@
     <ProjectReference Include="..\..\GQLCCG.Infra\GQLCCG.Infra.csproj" />
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(SolutionDir)..\out\netcoreapp2.2\$(TargetFileName)&quot;" />
-  </Target>
-
 </Project>
