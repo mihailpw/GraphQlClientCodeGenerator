@@ -39,6 +39,7 @@ namespace Generator.DotNetCore
                     context.MainClientFactoryClassName,
                     context.AdditionalClientUsing,
                     context.GenerateDocs,
+                    context.GenerateInputObjectConstructor,
                     schema,
                 },
                 partials);

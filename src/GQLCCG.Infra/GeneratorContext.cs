@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using GQLCCG.Infra.Utils;
 
 namespace GQLCCG.Infra
 {
@@ -14,46 +15,17 @@ namespace GQLCCG.Infra
 
         public bool GenerateInputObjectConstructor { get; set; } = false;
 
-        public TypeNames TypeTrims { get; } = new TypeNames
+        public TypeNames Names { get; } = new TypeNames
         {
-            Enum = "",
-            InputObject = "Input|InputType",
-            Interface = "Interface|InterfaceType",
-            Object = "Object|ObjectType",
-            Scalar = "",
-            Union = "Union|UnionType",
+            DtoEnum = new TypeNames.NameEntry { RemoveRegex = "Type", BuildFormat = "{0}Enum" },
+            DtoInputObject = new TypeNames.NameEntry { RemoveRegex = "Type", BuildFormat = "{0}Dto" },
+            DtoInterface = new TypeNames.NameEntry { RemoveRegex = "Type", BuildFormat = "{0}Dto" },
+            DtoObject = new TypeNames.NameEntry { RemoveRegex = "Type", BuildFormat = "{0}Dto" },
+            DtoUnion = new TypeNames.NameEntry { RemoveRegex = "Type", BuildFormat = "{0}Dto" },
+            BuilderInterface = new TypeNames.NameEntry { RemoveRegex = "Type", BuildFormat = "{0}Builder" },
+            BuilderObject = new TypeNames.NameEntry { RemoveRegex = "Type", BuildFormat = "{0}Builder" },
+            BuilderUnion = new TypeNames.NameEntry { RemoveRegex = "Type", BuildFormat = "{0}Builder" },
+            ConstructionOnType = new TypeNames.NameEntry { RemoveRegex = "Type", BuildFormat = "On{0}" },
         };
-
-        public TypeNames Dto { get; } = new TypeNames
-        {
-            Enum = "{0}Dto",
-            InputObject = "{0}Dto",
-            Interface = "{0}Dto",
-            Object = "{0}Dto",
-            Scalar = "{0}Dto",
-            Union = "{0}Dto",
-        };
-
-        public TypeNames Builder { get; } = new TypeNames
-        {
-            Enum = "{0}Builder",
-            InputObject = "{0}Builder",
-            Interface = "{0}Builder",
-            Object = "{0}Builder",
-            Scalar = "{0}Builder",
-            Union = "{0}Builder",
-        };
-
-
-
-        public class TypeNames
-        {
-            public string Enum { get; set; }
-            public string InputObject { get; set; }
-            public string Interface { get; set; }
-            public string Object { get; set; }
-            public string Scalar { get; set; }
-            public string Union { get; set; }
-        }
     }
 }

@@ -14,13 +14,13 @@ namespace Generator.DotNetCore.Infra
     {
         public HandlebarsTemplateBuilder(GeneratorContext context)
         {
-            var typeHelper = new GraphQlTypeHelper(context);
+            var typeHelper = new DotNetTypeHelper(context);
 
-            foreach (var methodInfo in typeof(GraphQlTypeHelper)
+            foreach (var methodInfo in typeof(DotNetTypeHelper)
                 .GetMethods()
                 .Where(m => m
                     .CustomAttributes
-                    .Any(a => a.AttributeType == typeof(GraphQlTypeHelper.AutoWire))))
+                    .Any(a => a.AttributeType == typeof(DotNetTypeHelper.AutoWire))))
             {
                 if (methodInfo.ReturnType == typeof(string))
                 {
