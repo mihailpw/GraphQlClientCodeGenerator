@@ -1,8 +1,7 @@
 {
   "profiles": {
     "GQLCCG": {
-      "commandName": "Project",
-      "commandLineArgs": "-c config.json"
+      "commandName": "Project"
     }
   }
 }

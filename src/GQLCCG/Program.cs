@@ -31,12 +31,14 @@ namespace GQLCCG
             catch (Exception e)
             {
                 Console.WriteLine(e.InnerException ?? e);
+                Environment.ExitCode = -1;
             }
         }
 
         private static void HandleErrors(IEnumerable<Error> errors)
         {
             Console.WriteLine("Arguments parsing errors.");
+            Environment.ExitCode = -1;
         }
     }
 }
