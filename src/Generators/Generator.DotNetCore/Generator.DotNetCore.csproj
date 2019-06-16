@@ -4,10 +4,6 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>..\..\..\out\plugins\Generator.DotNetCore</OutputPath>
-  </PropertyGroup>
-
   <ItemGroup>
     <None Remove="Templates\builder-method-args.handlebars" />
     <None Remove="Templates\builder-method-object.handlebars" />

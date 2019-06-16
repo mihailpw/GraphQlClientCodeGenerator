@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using CommandLine;
 
 namespace GQLCCG
@@ -9,16 +10,15 @@ namespace GQLCCG
         {
             var parser = new Parser(o =>
             {
-                o.AutoHelp = false;
+                o.AutoHelp = true;
                 o.AutoVersion = false;
+                o.IgnoreUnknownArguments = true;
+                o.HelpWriter = Console.Out;
             });
 
             parser.ParseArguments<ConsoleOptions>(args)
-                .WithParsed(GenerateClient);
-
-            Console.WriteLine();
-            Console.Write("Execution finished. Press <enter> to exit...");
-            Console.ReadLine();
+                .WithParsed(GenerateClient)
+                .WithNotParsed(HandleErrors);
         }
 
 
@@ -32,6 +32,11 @@ namespace GQLCCG
             {
                 Console.WriteLine(e.InnerException ?? e);
             }
+        }
+
+        private static void HandleErrors(IEnumerable<Error> errors)
+        {
+            Console.WriteLine("Arguments parsing errors.");
         }
     }
 }

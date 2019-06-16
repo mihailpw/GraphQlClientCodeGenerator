@@ -11,21 +11,21 @@ namespace GQLCCG.Processor.GeneratorWriters
         private sealed class TextGeneratorWriter : IGeneratorWriter
         {
             private readonly TextWriter _textWriter;
-            private readonly string _type;
+            private readonly string _name;
             private readonly Action _onDisposedAction;
 
 
-            public TextGeneratorWriter(TextWriter textWriter, string type, Action onDisposedAction)
+            public TextGeneratorWriter(TextWriter textWriter, string name, Action onDisposedAction)
             {
                 _textWriter = textWriter;
-                _type = type;
+                _name = name;
                 _onDisposedAction = onDisposedAction;
             }
 
 
             public async Task InitializeAsync()
             {
-                await _textWriter.WriteLineAsync($"------ start '{_type}' ------");
+                await _textWriter.WriteLineAsync($"------ start {GetNameText()}------");
             }
 
             public async Task WriteAsync(string code)
@@ -35,8 +35,16 @@ namespace GQLCCG.Processor.GeneratorWriters
 
             public async void Dispose()
             {
-                await _textWriter.WriteLineAsync($"------  end '{_type}'  ------");
+                await _textWriter.WriteLineAsync($"------  end {GetNameText()} ------");
                 _onDisposedAction();
+            }
+
+
+            private string GetNameText()
+            {
+                return string.IsNullOrEmpty(_name)
+                    ? string.Empty
+                    : $"'{_name}' ";
             }
         }
 
@@ -53,10 +61,10 @@ namespace GQLCCG.Processor.GeneratorWriters
         }
 
 
-        public async Task<IGeneratorWriter> CreateAsync(string type)
+        public async Task<IGeneratorWriter> CreateAsync(string name)
         {
             await _semaphore.WaitAsync();
-            var writer = _writerFactory(type);
+            var writer = _writerFactory(name);
             await writer.InitializeAsync();
 
             return writer;

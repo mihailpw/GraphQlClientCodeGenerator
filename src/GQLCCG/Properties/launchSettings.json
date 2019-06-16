@@ -2,8 +2,7 @@
   "profiles": {
     "GQLCCG": {
       "commandName": "Project",
-      //"commandLineArgs": "-n dotnetcore -u \"http://localhost:3000/graphql\""
-      "commandLineArgs": "-n dotnetcore -u \"https://localhost:5001/graphql\""
+      "commandLineArgs": "-c config.json"
     }
   }
 }

@@ -13,16 +13,34 @@ namespace GQLCCG
     {
         public static async Task GenerateClientAsync(ConsoleOptions options)
         {
+            var config = await Config.ReadFromAsync(options.Config);
+            if (config == null)
+            {
+                Console.WriteLine("Config file not found.");
+                return;
+            }
+
+            if (!config.Validate(out var configErrors))
+            {
+                Console.WriteLine("Wrong config file provided:");
+                foreach (var configError in configErrors)
+                {
+                    Console.WriteLine(configError);
+                }
+                return;
+            }
+
             var storage = new FromAssembliesGeneratorStore(new []
             {
                 typeof(DotNetCoreGenerator).Assembly,
             });
-            var schemaLoader = new FromUrlSchemaReader(options.SchemaUri, options.InnerLevelOfType);
-            var writer = new TextGeneratorWriterFactory(Console.Out);
+            var schemaLoader = new FromUrlSchemaReader(config.SchemaUri, config.InnerLevelOfType);
+            var writer = config.OutputToConsole
+                ? (IGeneratorWriterFactory) new TextGeneratorWriterFactory(Console.Out)
+                : new FileGeneratorWriterFactory();
 
             var processor = new GenerationProcessor(storage, schemaLoader, writer);
-            var context = new GeneratorContext();
-            await processor.ProcessAsync(options.GeneratorName, context);
+            await processor.ProcessAsync(config.Generator, config.CreateGeneratorContext());
         }
     }
 }
