@@ -39,7 +39,7 @@ namespace GQLCCG.Processor.SchemaReaders
                     if (!response.IsSuccessStatusCode)
                     {
                         throw new InvalidOperationException(
-                            $"Status code: {response.StatusCode} ({response.StatusCode}); content: {content}");
+                            $"Status code: {response.StatusCode:D} ({response.StatusCode:G}); content: {content}");
                     }
 
                     try

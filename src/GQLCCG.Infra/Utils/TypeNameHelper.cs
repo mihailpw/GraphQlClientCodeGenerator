@@ -6,24 +6,24 @@ namespace GQLCCG.Infra.Utils
 {
     public class TypeNames
     {
-        public NameEntry DtoEnum { get; set; }
-        public NameEntry DtoInputObject { get; set; }
-        public NameEntry DtoInterface { get; set; }
-        public NameEntry DtoObject { get; set; }
-        public NameEntry DtoUnion { get; set; }
+        public NameEntry DtoEnum { get; set; } = new NameEntry { RemoveRegex = "Type", BuildFormat = "{0}Enum" };
+        public NameEntry DtoInputObject { get; set; } = new NameEntry { RemoveRegex = "Type", BuildFormat = "{0}Dto" };
+        public NameEntry DtoInterface { get; set; } = new NameEntry { RemoveRegex = "Type", BuildFormat = "{0}Dto" };
+        public NameEntry DtoObject { get; set; } = new NameEntry { RemoveRegex = "Type", BuildFormat = "{0}Dto" };
+        public NameEntry DtoUnion { get; set; } = new NameEntry { RemoveRegex = "Type", BuildFormat = "{0}Dto" };
 
-        public NameEntry BuilderInterface { get; set; }
-        public NameEntry BuilderObject { get; set; }
-        public NameEntry BuilderUnion { get; set; }
+        public NameEntry BuilderInterface { get; set; } = new NameEntry { RemoveRegex = "Type", BuildFormat = "{0}Builder" };
+        public NameEntry BuilderObject { get; set; } = new NameEntry { RemoveRegex = "Type", BuildFormat = "{0}Builder" };
+        public NameEntry BuilderUnion { get; set; } = new NameEntry { RemoveRegex = "Type", BuildFormat = "{0}Builder" };
 
-        public NameEntry ConstructionOnType { get; set; }
+        public NameEntry ConstructionOnType { get; set; } = new NameEntry { RemoveRegex = "Type", BuildFormat = "On{0}" };
 
 
 
         public class NameEntry
         {
             public string RemoveRegex { get; set; }
-            public string BuildFormat { get; set; } = "{0}";
+            public string BuildFormat { get; set; }
         }
     }
 
@@ -116,19 +116,22 @@ namespace GQLCCG.Infra.Utils
         {
             var result = type.Name;
 
-            if (!string.IsNullOrEmpty(entry.RemoveRegex))
+            if (entry != null)
             {
-                result = Regex.Replace(result, entry.RemoveRegex, string.Empty);
-            }
+                if (!string.IsNullOrEmpty(entry.RemoveRegex))
+                {
+                    result = Regex.Replace(result, entry.RemoveRegex, string.Empty);
+                }
 
-            if (entry.BuildFormat.Contains("{0}"))
-            {
-                result = string.Format(entry.BuildFormat, result);
-            }
+                if (entry.BuildFormat.Contains("{0}"))
+                {
+                    result = string.Format(entry.BuildFormat, result);
+                }
 
-            if (isNullable)
-            {
-                result = MakeNullable(result, type);
+                if (isNullable)
+                {
+                    result = MakeNullable(result, type);
+                }
             }
 
             return result;

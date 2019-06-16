@@ -4,6 +4,6 @@ namespace GQLCCG.Infra
 {
     public interface IGeneratorWriterFactory
     {
-        Task<IGeneratorWriter> CreateAsync(string type);
+        Task<IGeneratorWriter> CreateAsync(string name);
     }
 }

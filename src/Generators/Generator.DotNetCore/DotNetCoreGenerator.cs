@@ -10,7 +10,7 @@ namespace Generator.DotNetCore
     {
         public async Task GenerateAsync(GraphQlSchema schema, IGeneratorWriterFactory writerFactory, GeneratorContext context)
         {
-            using (var writer = await writerFactory.CreateAsync("schema"))
+            using (var writer = await writerFactory.CreateAsync(context.WriterName))
             {
                 var generatorWriter = new GeneratorWriter(
                     new ResourcesTemplateReader(),

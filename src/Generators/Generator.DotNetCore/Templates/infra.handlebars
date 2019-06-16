@@ -13,6 +13,7 @@ namespace GraphQlClient.Infra
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
     using Newtonsoft.Json.Linq;
+    using Newtonsoft.Json.Serialization;
 
 
     #region Client
@@ -208,7 +209,10 @@ namespace GraphQlClient.Infra
 
         static GraphQlClientBase()
         {
-            DefaultJsonSerializerSettings = new JsonSerializerSettings();
+            DefaultJsonSerializerSettings = new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+            };
             DefaultJsonSerializerSettings.Converters.Add(new StringEnumConverter());
         }
 
