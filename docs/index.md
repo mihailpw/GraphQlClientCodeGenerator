@@ -4,25 +4,14 @@ A tool that helps you to make GraphQL request and get response from client to se
 
 ### Getting started
 
-1. Download generator.
-2. Setup config file.
-3. Execute generator.
+**Download generator**
 
-### Step 1. Download generator
+You can download [_**here**_](./downloads).
 
-Latest version: [**v.1.0.1**](https://github.com/mihailpw/GraphQlClientCodeGenerator/releases/tag/1.0.1).
+**Setup config for generator**
 
-| OS      |                                                                                                              |                                                                                                              |
-| ------- | :----------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------: |
-| Windows | [**x86**](https://github.com/mihailpw/GraphQlClientCodeGenerator/releases/download/1.0.1/gqlccg-win-x86.exe) | [**x64**](https://github.com/mihailpw/GraphQlClientCodeGenerator/releases/download/1.0.1/gqlccg-win-x64.exe) |
-| MacOS   |                                                                                                              | [**x64**](https://github.com/mihailpw/GraphQlClientCodeGenerator/releases/download/1.0.1/gqlccg-osx-x64)     |
-| Linux   |                                                                                                              | [**x64**](https://github.com/mihailpw/GraphQlClientCodeGenerator/releases/download/1.0.1/gqlccg-linux-x64)   |
+Please read [_**config docs**_](./config-docs) first. Also you can use [_**helper**_](./config-create) to create initial config file.
 
-### Step 2. Setup config file
+**Run generator**
 
-Setup.
-
-### Step 3. Execute generator
-
-Execute.
-
+You can put config file to folder with generator with name `config.json` or specify config file path with console line arguments: `-c "folder/config-file-name.json"` or `--config "folder/config-file-name.json"`.
