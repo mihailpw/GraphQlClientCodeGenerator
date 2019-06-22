@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace GQLCCG.Processor.SchemaReaders
 {
@@ -8,8 +10,8 @@ namespace GQLCCG.Processor.SchemaReaders
         {
             string WrapTypeRefRequest()
             {
-                const string ofTypeRequest = @"
-ofType {{
+                const string ofTypeRequest =
+@"ofType {{
   kind
   name
   {0}
@@ -26,8 +28,8 @@ ofType {{
 
             var shortType = WrapTypeRefRequest();
 
-            var request = @"
-query IntrospectionQuery {
+            var request =
+@"query IntrospectionQuery {
   __schema {
     queryType {
       name
@@ -101,10 +103,9 @@ fragment EnumValue on __EnumValue {
   description
   isDeprecated
   deprecationReason
-}
-";
+}";
 
-            return request;
+            return Regex.Replace(request, "[\r\n ]+", " ");
         }
 
 

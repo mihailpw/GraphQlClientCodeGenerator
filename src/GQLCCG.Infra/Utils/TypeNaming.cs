@@ -4,7 +4,7 @@ using GQLCCG.Infra.Models.Types;
 
 namespace GQLCCG.Infra.Utils
 {
-    public class TypeNames
+    public class TypeNamingModel
     {
         public NameEntry DtoEnum { get; set; } = new NameEntry { RemoveRegex = "Type", BuildFormat = "{0}Enum" };
         public NameEntry DtoInputObject { get; set; } = new NameEntry { RemoveRegex = "Type", BuildFormat = "{0}Dto" };
@@ -27,37 +27,37 @@ namespace GQLCCG.Infra.Utils
         }
     }
 
-    public abstract class TypeNameHelper
+    public abstract class TypeNamingHelper
     {
-        private readonly GeneratorContext _context;
+        private readonly TypeNamingModel _typeNamingModel;
 
 
-        protected TypeNameHelper(GeneratorContext context)
+        protected TypeNamingHelper(TypeNamingModel typeNamingModel)
         {
-            _context = context;
+            _typeNamingModel = typeNamingModel;
         }
 
 
         public virtual string ResolveDtoName(GraphQlTypeBase type, bool withNullable)
         {
-            TypeNames.NameEntry entry;
+            TypeNamingModel.NameEntry entry;
 
             switch (type)
             {
                 case GraphQlEnumType _:
-                    entry = _context.Names.DtoEnum;
+                    entry = _typeNamingModel.DtoEnum;
                     break;
                 case GraphQlInputObjectType _:
-                    entry = _context.Names.DtoInputObject;
+                    entry = _typeNamingModel.DtoInputObject;
                     break;
                 case GraphQlInterfaceType _:
-                    entry = _context.Names.DtoInterface;
+                    entry = _typeNamingModel.DtoInterface;
                     break;
                 case GraphQlObjectType _:
-                    entry = _context.Names.DtoObject;
+                    entry = _typeNamingModel.DtoObject;
                     break;
                 case GraphQlUnionType _:
-                    entry = _context.Names.DtoUnion;
+                    entry = _typeNamingModel.DtoUnion;
                     break;
                 default:
                     throw new NotSupportedException($"Type {type.Kind:G} can not be dto.");
@@ -83,18 +83,18 @@ namespace GQLCCG.Infra.Utils
         {
             type = type.GetRealType();
 
-            TypeNames.NameEntry entry;
+            TypeNamingModel.NameEntry entry;
 
             switch (type)
             {
                 case GraphQlInterfaceType _:
-                    entry = _context.Names.BuilderInterface;
+                    entry = _typeNamingModel.BuilderInterface;
                     break;
                 case GraphQlObjectType _:
-                    entry = _context.Names.BuilderObject;
+                    entry = _typeNamingModel.BuilderObject;
                     break;
                 case GraphQlUnionType _:
-                    entry = _context.Names.BuilderUnion;
+                    entry = _typeNamingModel.BuilderUnion;
                     break;
                 default:
                     throw new InvalidOperationException($"Type {type.Kind:G} can not be a builder.");
@@ -105,14 +105,14 @@ namespace GQLCCG.Infra.Utils
 
         public virtual string ResolveOnTypeMethodName(GraphQlTypeBase type)
         {
-            return ProcessName(type.GetRealType(), _context.Names.ConstructionOnType);
+            return ProcessName(type.GetRealType(), _typeNamingModel.ConstructionOnType);
         }
 
 
         protected abstract string MakeNullable(string generatedName, GraphQlTypeBase type);
 
 
-        private string ProcessName(GraphQlTypeBase type, TypeNames.NameEntry entry, bool isNullable = false)
+        private string ProcessName(GraphQlTypeBase type, TypeNamingModel.NameEntry entry, bool isNullable = false)
         {
             var result = type.Name;
 

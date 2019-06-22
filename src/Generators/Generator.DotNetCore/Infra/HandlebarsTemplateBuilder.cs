@@ -14,7 +14,7 @@ namespace Generator.DotNetCore.Infra
     {
         public HandlebarsTemplateBuilder(GeneratorContext context)
         {
-            var typeHelper = new DotNetTypeHelper(context);
+            var typeHelper = new DotNetTypeHelper(context.TypeNaming);
 
             foreach (var methodInfo in typeof(DotNetTypeHelper)
                 .GetMethods()
@@ -91,9 +91,11 @@ namespace Generator.DotNetCore.Infra
                 "toPascal",
                 (output, _, args) => output.Write(args.ResolveArgument<string>().ToPascal()));
 
+#if DEBUG
             Handlebars.RegisterHelper(
                 "debug",
                 (output, _, args) => Debugger.Break());
+#endif
         }
 
 

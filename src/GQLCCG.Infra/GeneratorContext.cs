@@ -17,6 +17,6 @@ namespace GQLCCG.Infra
 
         public bool GenerateInputObjectConstructor { get; set; } = false;
 
-        public TypeNames Names { get; set; } = new TypeNames();
+        public TypeNamingModel TypeNaming { get; set; } = new TypeNamingModel();
     }
 }

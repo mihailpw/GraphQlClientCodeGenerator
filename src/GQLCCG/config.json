@@ -1,15 +1,17 @@
 {
-  "schemaUri": "https://localhost:5001/graphql",
-  "outputFilePath": "Generated.cs",
-  "outputToConsole": false,
+  "schemaUri": "https://swapi.apis.guru",
   "generator": "dotnetcore",
+  "name": "Generated.cs",
   "innerLevelOfType": 4,
+  "outputToFolder": true,
+  "outputFolderPath": "./",
+  "outputToConsole": true,
   "namespace": "GraphQlClient",
   "mainClientFactoryClassName": "AppClientFactory",
   "additionalClientUsing": [],
   "generateDocs": false,
-  "generateInputObjectConstructor": false,
-  "names": {
+  "generateInputObjectConstructor": true,
+  "typeNaming": {
     "dtoEnum": {
       "removeRegex": "Type",
       "buildFormat": "{0}Enum"

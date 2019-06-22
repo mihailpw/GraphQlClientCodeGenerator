@@ -29,7 +29,7 @@ namespace Generator.DotNetCore
                 infraTemplate,
                 new { context.Namespace });
 
-            var partials = await ResolveTemplates("dto", "builder", "builder-method-args", "builder-method-object", "builder-method-scalar");
+            var partials = await ResolveTemplatesAsync("dto", "builder", "builder-method-args", "builder-method-object", "builder-method-scalar");
             var clientTemplate = await _templateReader.ReadAsync("client");
             var clientView = await _templateBuilder.BuildAsync(
                 clientTemplate,
@@ -49,7 +49,7 @@ namespace Generator.DotNetCore
         }
 
 
-        private async Task<IDictionary<string, string>> ResolveTemplates(params string[] templateNames)
+        private async Task<IDictionary<string, string>> ResolveTemplatesAsync(params string[] templateNames)
         {
             var dict = new Dictionary<string, string>();
 

@@ -26,12 +26,7 @@ namespace GQLCCG.Processor.SchemaReaders
         {
             using (var client = new HttpClient())
             {
-                using (var response = await client.PostAsync(
-                    _uri,
-                    new StringContent(
-                        JsonConvert.SerializeObject(new { query = GraphQlJsonDto.RetrieveSchemaQuery(_innerLevelOfType) }),
-                        Encoding.UTF8,
-                        "application/json")))
+                using (var response = await client.PostAsync(_uri, CreateContent()))
                 {
                     var content = response.Content != null
                         ? await response.Content.ReadAsStringAsync()
@@ -59,6 +54,16 @@ namespace GQLCCG.Processor.SchemaReaders
                     }
                 }
             }
+        }
+
+        private HttpContent CreateContent()
+        {
+            var schemaQuery = GraphQlJsonDto.RetrieveSchemaQuery(_innerLevelOfType);
+
+            return new StringContent(
+                JsonConvert.SerializeObject(new { query = schemaQuery }),
+                Encoding.UTF8,
+                "application/json");
         }
     }
 }

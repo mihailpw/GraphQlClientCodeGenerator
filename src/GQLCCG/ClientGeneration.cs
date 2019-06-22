@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Generator.DotNetCore;
 using GQLCCG.Infra;
@@ -14,20 +16,12 @@ namespace GQLCCG
         public static async Task GenerateClientAsync(ConsoleOptions options)
         {
             var config = await Config.ReadFromAsync(options.Config);
-            if (config == null)
-            {
-                Console.WriteLine("Config file not found.");
-                return;
-            }
-
             if (!config.Validate(out var configErrors))
             {
-                Console.WriteLine("Wrong config file provided:");
-                foreach (var configError in configErrors)
-                {
-                    Console.WriteLine(configError);
-                }
-                return;
+                var resultMessage = string.Join(
+                    Environment.NewLine,
+                    new[] { "wrong config file provided.", "Config file errors:" }.Concat(configErrors));
+                throw new InvalidOperationException(resultMessage);
             }
 
             var storage = new FromAssembliesGeneratorStore(new []
@@ -35,12 +29,36 @@ namespace GQLCCG
                 typeof(DotNetCoreGenerator).Assembly,
             });
             var schemaLoader = new FromUrlSchemaReader(config.SchemaUri, config.InnerLevelOfType);
-            var writer = config.OutputToConsole
-                ? (IGeneratorWriterFactory) new TextGeneratorWriterFactory(Console.Out)
-                : new FileGeneratorWriterFactory();
+            var writer = CreateWriterFactory(config);
 
             var processor = new GenerationProcessor(storage, schemaLoader, writer);
             await processor.ProcessAsync(config.Generator, config.CreateGeneratorContext());
+        }
+
+
+        private static IGeneratorWriterFactory CreateWriterFactory(Config config)
+        {
+            var factories = new List<IGeneratorWriterFactory>();
+
+            if (config.OutputToFolder)
+            {
+                factories.Add(new FileGeneratorWriterFactory(config.OutputFolderPath));
+            }
+
+            if (config.OutputToConsole)
+            {
+                factories.Add(new TextGeneratorWriterFactory(Console.Out));
+            }
+
+            switch (factories.Count)
+            {
+                case 0:
+                    throw new InvalidOperationException("Output target not provided.");
+                case 1:
+                    return factories.First();
+                default:
+                    return new CompositeGeneratorWriterFactory(factories);
+            }
         }
     }
 }

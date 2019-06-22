@@ -1,16 +1,15 @@
 ﻿using System;
 using System.ComponentModel;
-using GQLCCG.Infra;
 using GQLCCG.Infra.Models.Objects;
 using GQLCCG.Infra.Models.Types;
 using GQLCCG.Infra.Utils;
 
 namespace Generator.DotNetCore.Helpers
 {
-    public class DotNetTypeHelper : TypeNameHelper
+    public class DotNetTypeHelper : TypeNamingHelper
     {
-        public DotNetTypeHelper(GeneratorContext context)
-            : base(context)
+        public DotNetTypeHelper(TypeNamingModel typeNamingModel)
+            : base(typeNamingModel)
         {
         }
 
@@ -81,7 +80,7 @@ namespace Generator.DotNetCore.Helpers
         {
             return inputValue.Type is GraphQlNonNullType
                 ? string.Empty
-                : string.Format(format, inputValue.DefaultValue);
+                : string.Format(format, inputValue.DefaultValue ?? "null");
         }
 
         public bool IfKind(GraphQlTypeBase type, string[] kindValues)

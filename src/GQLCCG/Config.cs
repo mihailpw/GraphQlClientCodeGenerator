@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using GQLCCG.Infra;
@@ -16,9 +17,13 @@ namespace GQLCCG
 
         public int InnerLevelOfType { get; set; } = 4;
 
-        public bool OutputToConsole { get; set; } = false;
+        public string Name { get; set; } = "Generated.cs";
 
-        public string OutputFilePath { get; set; }
+        public bool OutputToFolder { get; set; } = true;
+
+        public string OutputFolderPath { get; set; } = "./";
+
+        public bool OutputToConsole { get; set; } = false;
 
         public string Namespace { get; set; } = "GraphQlClient";
 
@@ -30,14 +35,14 @@ namespace GQLCCG
 
         public bool GenerateInputObjectConstructor { get; set; } = false;
 
-        public TypeNames Names { get; set; } = new TypeNames();
+        public TypeNamingModel TypeNaming { get; set; } = new TypeNamingModel();
 
 
         public static async Task<Config> ReadFromAsync(string path)
         {
             if (!File.Exists(path))
             {
-                return null;
+                throw new FileNotFoundException($"Config file not found (path={path}).");
             }
 
             using (var stream = File.OpenRead(path))
@@ -49,63 +54,70 @@ namespace GQLCCG
 
         public bool Validate(out IReadOnlyList<string> errors)
         {
-            var outErrors = new List<string>();
-
-            if (string.IsNullOrEmpty(SchemaUri))
+            IEnumerable<string> GetErrors()
             {
-                outErrors.Add("Schema url not provided.");
-            } else if (!Uri.TryCreate(SchemaUri, UriKind.Absolute, out _))
-            {
-                outErrors.Add("Schema url is not valid.");
-            }
-
-            if (string.IsNullOrEmpty(Generator))
-            {
-                outErrors.Add("Generator not specified.");
-            }
-
-            if (!OutputToConsole)
-            {
-                if (string.IsNullOrEmpty(OutputFilePath))
+                if (string.IsNullOrEmpty(SchemaUri))
                 {
-                    outErrors.Add("Output file path not specified.");
+                    yield return "Schema url not provided.";
                 }
-                else if (!Uri.TryCreate(OutputFilePath, UriKind.RelativeOrAbsolute, out _))
+                else if (!Uri.TryCreate(SchemaUri, UriKind.Absolute, out _))
                 {
-                    outErrors.Add("Output file path is not valid.");
+                    yield return "Schema url is not valid.";
+                }
+
+                if (string.IsNullOrEmpty(Generator))
+                {
+                    yield return "Generator not specified.";
+                }
+
+                if (string.IsNullOrEmpty(Name))
+                {
+                    yield return "Name not specified.";
+                }
+
+                if (OutputToFolder)
+                {
+                    if (OutputFolderPath == null)
+                    {
+                        yield return "Output file path is not provided.";
+                    }
+                    else if (!Uri.TryCreate(OutputFolderPath, UriKind.RelativeOrAbsolute, out _))
+                    {
+                        yield return "Output file path is not valid.";
+                    }
+                }
+
+                if (string.IsNullOrEmpty(Namespace))
+                {
+                    yield return "Namespace not provided.";
+                }
+
+                if (string.IsNullOrEmpty(MainClientFactoryClassName))
+                {
+                    yield return "Main client factory class name not provided.";
+                }
+
+                if (TypeNaming == null)
+                {
+                    yield return "Type naming not provided.";
                 }
             }
 
-            if (string.IsNullOrEmpty(Namespace))
-            {
-                outErrors.Add("Namespace not provided.");
-            }
-
-            if (string.IsNullOrEmpty(MainClientFactoryClassName))
-            {
-                outErrors.Add("Main client factory class name not provided.");
-            }
-
-            if (Names == null)
-            {
-                outErrors.Add("Names not provided.");
-            }
-
-            errors = outErrors;
-            return outErrors.Count == 0;
+            errors = GetErrors().ToList();
+            return errors.Count == 0;
         }
 
         public GeneratorContext CreateGeneratorContext()
         {
             return new GeneratorContext
             {
-                WriterName = OutputFilePath,
+                WriterName = Name,
                 Namespace = Namespace,
                 MainClientFactoryClassName = MainClientFactoryClassName,
                 AdditionalClientUsing = AdditionalClientUsing ?? new List<string>(0),
                 GenerateDocs = GenerateDocs,
                 GenerateInputObjectConstructor = GenerateInputObjectConstructor,
-                Names = Names,
+                TypeNaming = TypeNaming,
             };
         }
     }

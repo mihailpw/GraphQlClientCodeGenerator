@@ -19,6 +19,8 @@ namespace GQLCCG
             parser.ParseArguments<ConsoleOptions>(args)
                 .WithParsed(GenerateClient)
                 .WithNotParsed(HandleErrors);
+
+            Console.ReadLine();
         }
 
 
@@ -30,7 +32,14 @@ namespace GQLCCG
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.InnerException ?? e);
+                var exception = e.InnerException ?? e;
+
+#if DEBUG
+                Console.WriteLine(exception);
+#else
+                Console.WriteLine($"Error: {exception.Message}");
+#endif
+
                 Environment.ExitCode = -1;
             }
         }
