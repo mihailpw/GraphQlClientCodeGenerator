@@ -9,5 +9,3 @@ bld/
 out/
 .vs/
 *.user
-
-!/bin/
