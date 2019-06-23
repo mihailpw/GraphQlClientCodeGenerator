@@ -4,50 +4,91 @@ using System.IO;
 using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using GQLCCG.Configuration.Configurators;
 using GQLCCG.Infra;
 using GQLCCG.Infra.Utils;
 
-namespace GQLCCG
+namespace GQLCCG.Configuration
 {
     internal class Config
     {
+        [ConfiguratorProperty(
+            setupQuestion: "Set schema uri: ")]
         public string SchemaUri { get; set; }
 
+        [ConfiguratorProperty(
+            setupQuestion: "Set generator name: ", "dotnetcore")]
         public string Generator { get; set; }
 
+        [OptionalConfiguratorProperty(
+            optionalQuestion: "Do you want to set inner level of type?",
+            setupQuestion: "Set inner level of type: ",
+            "dotnetcore")]
         public int InnerLevelOfType { get; set; } = 4;
 
+        [OptionalConfiguratorProperty(
+            optionalQuestion: "Do you want to set output name?",
+            setupQuestion: "Set output name: ")]
         public string Name { get; set; } = "Generated.cs";
 
+        [ConfiguratorProperty(
+            setupQuestion: "Do you want write generation to file?",
+            ConfiguratorType = typeof(BooleanConfigurator))]
         public bool OutputToFolder { get; set; } = true;
 
+        [OptionalConfiguratorProperty(
+            optionalQuestion: "Do you want to set output folder path?",
+            setupQuestion: "Set output folder path: ")]
         public string OutputFolderPath { get; set; } = "./";
 
-        public bool OutputToConsole { get; set; } = false;
+        [ConfiguratorProperty(
+            setupQuestion: "Do you want save generation to console?",
+            ConfiguratorType = typeof(BooleanConfigurator))]
+        public bool OutputToConsole { get; set; }
 
+        [OptionalConfiguratorProperty(
+            optionalQuestion: "Do you want to set namespace?",
+            setupQuestion: "Set namespace: ")]
         public string Namespace { get; set; } = "GraphQlClient";
 
+        [OptionalConfiguratorProperty(
+            optionalQuestion: "Do you want to set main client factory class name?",
+            setupQuestion: "Set main client factory class name: ")]
         public string MainClientFactoryClassName { get; set; } = "AppClientFactory";
 
-        public IList<string> AdditionalClientUsing { get; set; } = new List<string>();
+        [OptionalConfiguratorProperty(
+            optionalQuestion: "Do you want to set additional client using?",
+            setupQuestion: "Set additional client using (use comma to separate): ",
+            ConfiguratorType = typeof(ArrayConfigurator))]
+        public string[] AdditionalClientUsing { get; set; } = null;
 
+        [ConfiguratorProperty(
+            setupQuestion: "Do you want to generate docs?",
+            ConfiguratorType = typeof(BooleanConfigurator))]
         public bool GenerateDocs { get; set; } = false;
 
+        [ConfiguratorProperty(
+            setupQuestion: "Do you want to generate input object constructor?",
+            ConfiguratorType = typeof(BooleanConfigurator))]
         public bool GenerateInputObjectConstructor { get; set; } = false;
 
+        [OptionalConfiguratorProperty(
+            optionalQuestion: "Do you want to set type naming?",
+            setupQuestion: "Set type naming: ",
+            ConfiguratorType = typeof(TypeNamingConfigurator))]
         public TypeNamingModel TypeNaming { get; set; } = new TypeNamingModel();
 
 
         public static async Task<Config> ReadFromAsync(string path)
         {
-            if (!File.Exists(path))
+            if (!File.Exists(path: path))
             {
-                throw new FileNotFoundException($"Config file not found (path={path}).");
+                throw new FileNotFoundException(message: $"Config file not found (path={path}).");
             }
 
-            using (var stream = File.OpenRead(path))
+            using (var stream = File.OpenRead(path: path))
             {
-                return await JsonSerializer.ReadAsync<Config>(stream, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+                return await JsonSerializer.ReadAsync<Config>(utf8Json: stream, options: new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
             }
         }
 
@@ -114,7 +155,7 @@ namespace GQLCCG
                 WriterName = Name,
                 Namespace = Namespace,
                 MainClientFactoryClassName = MainClientFactoryClassName,
-                AdditionalClientUsing = AdditionalClientUsing ?? new List<string>(0),
+                AdditionalClientUsing = AdditionalClientUsing?.ToList() ?? new List<string>(0),
                 GenerateDocs = GenerateDocs,
                 GenerateInputObjectConstructor = GenerateInputObjectConstructor,
                 TypeNaming = TypeNaming,

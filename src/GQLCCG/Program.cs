@@ -8,6 +8,8 @@ namespace GQLCCG
     {
         public static void Main(string[] args)
         {
+            Console.Title = "GraphQL Client Code Generator";
+
             var parser = new Parser(o =>
             {
                 o.AutoHelp = true;
