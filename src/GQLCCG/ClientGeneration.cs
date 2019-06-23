@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Generator.DotNetCore;
+using GQLCCG.Configuration;
 using GQLCCG.Infra;
 using GQLCCG.Processor;
 using GQLCCG.Processor.GeneratorStores;
@@ -15,7 +17,10 @@ namespace GQLCCG
     {
         public static async Task GenerateClientAsync(ConsoleOptions options)
         {
-            var config = await Config.ReadFromAsync(options.Config);
+            var config = !options.SetupConfig
+                ? await Config.ReadFromAsync(options.Config)
+                : await AutoConfigurator.CreateAndWriteConfig(options.Config);
+
             if (!config.Validate(out var configErrors))
             {
                 var resultMessage = string.Join(
