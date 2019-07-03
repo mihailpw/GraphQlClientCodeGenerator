@@ -17,7 +17,7 @@ namespace GQLCCG
     {
         public static async Task GenerateClientAsync(ConsoleOptions options)
         {
-            var config = !options.SetupConfig
+            var config = !options.ConfigCreate
                 ? await Config.ReadFromAsync(options.Config)
                 : await AutoConfigurator.CreateAndWriteConfig(options.Config);
 

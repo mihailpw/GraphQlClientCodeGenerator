@@ -21,8 +21,6 @@ namespace GQLCCG
             parser.ParseArguments<ConsoleOptions>(args)
                 .WithParsed(GenerateClient)
                 .WithNotParsed(HandleErrors);
-
-            Console.ReadLine();
         }
 
 
