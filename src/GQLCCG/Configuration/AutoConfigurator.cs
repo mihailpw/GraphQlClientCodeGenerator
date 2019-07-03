@@ -3,7 +3,10 @@ using System.IO;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using GQLCCG.Configuration;
 using GQLCCG.Configuration.Configurators;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace GQLCCG.Configuration
 {
@@ -18,13 +21,15 @@ namespace GQLCCG.Configuration
                 File.Delete(path);
             }
 
-            using (var stream = File.OpenWrite(path: path))
+            var json = JsonConvert.SerializeObject(config, new JsonSerializerSettings
             {
-                await JsonSerializer.WriteAsync(config, stream, new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    WriteIndented = true,
-                });
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                Formatting = Formatting.Indented,
+            });
+            using (var stream = File.OpenWrite(path))
+            using (var streamWriter = new StreamWriter(stream))
+            {
+                await streamWriter.WriteAsync(json);
             }
 
             return config;

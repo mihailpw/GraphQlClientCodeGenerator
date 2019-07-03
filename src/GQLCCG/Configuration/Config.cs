@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using GQLCCG.Configuration.Configurators;
 using GQLCCG.Infra;
 using GQLCCG.Infra.Utils;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace GQLCCG.Configuration
 {
@@ -81,14 +83,19 @@ namespace GQLCCG.Configuration
 
         public static async Task<Config> ReadFromAsync(string path)
         {
-            if (!File.Exists(path: path))
+            if (!File.Exists(path))
             {
-                throw new FileNotFoundException(message: $"Config file not found (path={path}).");
+                throw new FileNotFoundException();
             }
 
-            using (var stream = File.OpenRead(path: path))
+            using (var stream = File.OpenRead(path))
+            using (var streamReader = new StreamReader(stream))
             {
-                return await JsonSerializer.ReadAsync<Config>(utf8Json: stream, options: new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+                var data = await streamReader.ReadToEndAsync();
+                return JsonConvert.DeserializeObject<Config>(data, new JsonSerializerSettings
+                {
+                    ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                });
             }
         }
 
