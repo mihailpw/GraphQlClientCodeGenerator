@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29025.244
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GQLS.App", "GQLS.App\GQLS.App.csproj", "{AE033305-6434-4F90-9CE2-394365B2FA8A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GQLS.ApiClient", "GQLS.ApiClient\GQLS.ApiClient.csproj", "{72C120EA-B2C6-4EFD-B1A4-3621B8BC4343}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AE033305-6434-4F90-9CE2-394365B2FA8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE033305-6434-4F90-9CE2-394365B2FA8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE033305-6434-4F90-9CE2-394365B2FA8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE033305-6434-4F90-9CE2-394365B2FA8A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72C120EA-B2C6-4EFD-B1A4-3621B8BC4343}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72C120EA-B2C6-4EFD-B1A4-3621B8BC4343}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72C120EA-B2C6-4EFD-B1A4-3621B8BC4343}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72C120EA-B2C6-4EFD-B1A4-3621B8BC4343}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {829C9F36-3F2D-46A2-89EA-37E94F47324F}
+	EndGlobalSection
+EndGlobal
