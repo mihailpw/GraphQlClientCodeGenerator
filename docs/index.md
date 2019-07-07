@@ -15,3 +15,7 @@ Please read [_**config docs**_](./config-docs) first. Also you can use [_**helpe
 **Run generator**
 
 You can put config file to folder with generator with name `config.json` or specify config file path with console line arguments: `-c "folder/config-file-name.json"` or `--config "folder/config-file-name.json"`.
+
+### Setup docs
+
+- [DotNetCore](./sample-dotnetcore)
