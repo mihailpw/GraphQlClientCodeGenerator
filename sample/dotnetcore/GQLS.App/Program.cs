@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using GraphQlClient;
+using GQLS.ApiClient;
 using Newtonsoft.Json;
 
 namespace GQLS.App

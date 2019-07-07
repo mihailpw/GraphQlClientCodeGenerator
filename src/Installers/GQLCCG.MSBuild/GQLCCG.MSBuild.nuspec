@@ -4,7 +4,7 @@
   <metadata>
     <id>GQLCCG.MSBuild</id>
     <title>GraphQl Client Code Generator</title>
-    <version>1.0.2</version>
+    <version>1.0.2.1</version>
     <authors>Mihail Podshivadlov</authors>
     <owners>Mihail Podshivadlov</owners>
     <license type="expression">MIT</license>
@@ -14,8 +14,9 @@
     <description>GraphQL Client Code Generator</description>
     <releaseNotes>Add config generator</releaseNotes>
     <copyright>Copyright © Mihail Podshivadlov, 2019</copyright>
-    <tags>netcore graphql dotnet</tags>
-    <developmentDependency>true</developmentDependency>
+    <repository type="git" url="https://github.com/mihailpw/GraphQlClientCodeGenerator.git"/>
+    <tags>DotNet DotNetCore GraphQL Client CodeGen</tags>
+	<developmentDependency>true</developmentDependency>
     <dependencies />
   </metadata>
 

@@ -1,10 +1,10 @@
-namespace GraphQlClient
+namespace GQLS.ApiClient
 {
     using System;
     using System.Collections.Generic;
     using System.Runtime.Serialization;
     using Newtonsoft.Json;
-    using GraphQlClient.Infra;
+    using GQLS.ApiClient.Infra;
 
     #region Dtos
 
@@ -4187,7 +4187,7 @@ namespace GraphQlClient
     }
 }
 
-namespace GraphQlClient.Infra
+namespace GQLS.ApiClient.Infra
 {
     using System;
     using System.Collections.Generic;

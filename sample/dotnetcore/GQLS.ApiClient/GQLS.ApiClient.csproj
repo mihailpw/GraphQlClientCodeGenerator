@@ -5,11 +5,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="GQLCCG.MSBuild" Version="1.0.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="GraphQL.Client" Version="2.0.0-alpha.3" />
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="call $(ProjectDir)/gqlccg-win-x86.exe" />
+    <Exec Command="$(GqlccgExe_x64) run /variables:Configuration=$(Configuration)" />
   </Target>
 
 </Project>
