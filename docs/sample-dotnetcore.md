@@ -6,11 +6,11 @@
 
 Create separate project for API calling. I'll name it `GQLS.ApiClient`.
 
-Download GraphQL Client Code Generator [from here](./downloads) and save to project root folder. Add build event to project for autogenerating in case of rebuild:
+Install GraphQL Client Code Generator using nuget package ([docs](./installation)). Add build event to project for autogenerating in case of rebuild:
 
 ``` xml
 <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-  <Exec Command="call $(ProjectDir)/gqlccg-win-x86.exe" />
+  <Exec Command="$(GqlccgExe_x64) run /variables:Configuration=$(Configuration)" />
 </Target>
 ```
 
@@ -26,7 +26,7 @@ Current generator depends on [`GraphQL.Client`](https://github.com/graphql-dotne
 Install-Package GraphQL.Client -Version 2.0.0-alpha.3
 ```
 
-Please, make sure you install version 2+.
+Please, make sure you install GraphQL.Client version 2+.
 
 After that you can build your project.
 

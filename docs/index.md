@@ -4,9 +4,9 @@ A tool that helps you to make GraphQL request and get response from client to se
 
 ### Getting started
 
-**Download generator**
+**Install generator**
 
-You can download [_**here**_](./downloads).
+You can install generator following instructions [_**here**_](./installation).
 
 **Setup config for generator**
 

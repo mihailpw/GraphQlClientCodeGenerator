@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.0</TargetFramework>
-    <Version>1.0.2</Version>
+    <Version>1.0.2.1</Version>
     <Authors>Mihail Podshivadlov</Authors>
     <Product>GraphQL Client Code Generator</Product>
     <SignAssembly>false</SignAssembly>
@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <None Update="config.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 

@@ -6,7 +6,7 @@
   "outputToFolder": true,
   "outputFolderPath": "./",
   "outputToConsole": false,
-  "namespace": "GraphQlClient",
+  "namespace": "GQLS.ApiClient",
   "mainClientFactoryClassName": "AppApiClientFactory",
   "additionalClientUsing": null,
   "generateDocs": false,
