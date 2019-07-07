@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <GqlccgExe_x64>"$(MSBuildThisFileDirectory)../tools/win-x64/GQLCCG.exe"</GqlccgExe_x64>
+    <GqlccgExe_x86>"$(MSBuildThisFileDirectory)../tools/win-x86/GQLCCG.exe"</GqlccgExe_x86>
+  </PropertyGroup>
+</Project>
