@@ -2,7 +2,17 @@
 
 [< back](./index)
 
-### Download generator
+### Nuget package
+
+Using Package Manager Console run:
+
+```
+Install-Package GQLCCG.MSBuild
+```
+
+Nuget package: [GQLCCG.MSBuild](https://www.nuget.org/packages/GQLCCG.MSBuild/).
+
+### Direct download
 
 Latest version: **v.1.0.2** ([_**link**_](https://github.com/mihailpw/GraphQlClientCodeGenerator/releases/tag/1.0.2)).
 
