@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using GQLCCG.Infra.Exceptions;
 using GQLCCG.Infra.Models.Types;
 
 namespace GQLCCG.Infra.Utils
@@ -60,7 +61,7 @@ namespace GQLCCG.Infra.Utils
                     entry = _typeNamingModel.DtoUnion;
                     break;
                 default:
-                    throw new NotSupportedException($"Type {type.Kind:G} can not be dto.");
+                    throw new GeneratorNotSupportedException($"Type {type.Kind:G} can not be dto.");
             }
 
             return ProcessName(type, entry, withNullable);
@@ -97,7 +98,7 @@ namespace GQLCCG.Infra.Utils
                     entry = _typeNamingModel.BuilderUnion;
                     break;
                 default:
-                    throw new InvalidOperationException($"Type {type.Kind:G} can not be a builder.");
+                    throw new GeneratorInvalidOperationException($"Type {type.Kind:G} can not be a builder.");
             }
 
             return ProcessName(type, entry);

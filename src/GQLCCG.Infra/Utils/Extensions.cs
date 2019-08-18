@@ -1,4 +1,5 @@
 ﻿using System;
+using GQLCCG.Infra.Exceptions;
 
 namespace GQLCCG.Infra.Utils
 {
@@ -6,7 +7,7 @@ namespace GQLCCG.Infra.Utils
     {
         public static T VerifyNotNull<T>(this T source, string paramName) where T : class
         {
-            return source ?? throw new ArgumentNullException(paramName);
+            return source ?? throw new GeneratorArgumentNullException(paramName);
         }
     }
 }

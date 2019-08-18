@@ -49,24 +49,34 @@ namespace GQLCCG.Processor.GeneratorWriters
         {
             await Task.CompletedTask;
 
-            var path = Path.Combine(_folder, name);
+            CreateFolderIfNotExists();
 
             void OnDispose()
             {
-                if (_textWriters.ContainsKey(path))
+                if (_textWriters.ContainsKey(name))
                 {
-                    _textWriters[path].Dispose();
-                    _textWriters.Remove(path);
+                    _textWriters[name].Dispose();
+                    _textWriters.Remove(name);
                 }
             }
 
-            if (!_textWriters.ContainsKey(path))
+            if (!_textWriters.ContainsKey(name))
             {
+                var path = Path.Combine(_folder, name);
                 var fileInfo = new FileInfo(path);
-                _textWriters.Add(path, fileInfo.CreateText());
+                _textWriters.Add(name, fileInfo.CreateText());
             }
 
-            return new FileGeneratorWriter(_textWriters[path], OnDispose);
+            return new FileGeneratorWriter(_textWriters[name], OnDispose);
+        }
+
+
+        private void CreateFolderIfNotExists()
+        {
+            if (!Directory.Exists(_folder))
+            {
+                Directory.CreateDirectory(_folder);
+            }
         }
     }
 }

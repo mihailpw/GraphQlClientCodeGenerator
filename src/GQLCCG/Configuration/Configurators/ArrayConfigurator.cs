@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using GQLCCG.Infra.Exceptions;
 
 namespace GQLCCG.Configuration.Configurators
 {
@@ -10,7 +11,7 @@ namespace GQLCCG.Configuration.Configurators
         {
             if (!property.PropertyType.IsArray)
             {
-                throw new InvalidOperationException($"Property {property.Name} (type={property.PropertyType.Name}) is not array.");
+                throw new GeneratorInvalidOperationException($"Property {property.Name} (type={property.PropertyType.Name}) is not array.");
             }
 
             var defaultValue = property.GetValue(target);

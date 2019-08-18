@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using GQLCCG.Infra.Exceptions;
 using GQLCCG.Infra.Models.Objects;
 using GQLCCG.Infra.Models.Types;
 using GQLCCG.Infra.Utils;
@@ -30,7 +31,7 @@ namespace Generator.DotNetCore.Helpers
                         case ScalarTypes.String:
                             return "string";
                         case ScalarTypes.Boolean:
-                            return $"bool{nullableSign}";
+                            return $"{nullableSign}";
                         case ScalarTypes.Float:
                             return $"float{nullableSign}";
                         case ScalarTypes.Int:
@@ -49,8 +50,24 @@ namespace Generator.DotNetCore.Helpers
                             return $"long{nullableSign}";
                         case ScalarTypes.Decimal:
                             return $"decimal{nullableSign}";
+                        case ScalarTypes.Uri:
+                            return "Uri";
+                        case ScalarTypes.Guid:
+                            return $"Guid{nullableSign}";
+                        case ScalarTypes.Short:
+                            return $"short{nullableSign}";
+                        case ScalarTypes.UShort:
+                            return $"ushort{nullableSign}";
+                        case ScalarTypes.UInt:
+                            return $"uint{nullableSign}";
+                        case ScalarTypes.ULong:
+                            return $"ulong{nullableSign}";
+                        case ScalarTypes.Byte:
+                            return $"byte{nullableSign}";
+                        case ScalarTypes.SByte:
+                            return $"sbyte{nullableSign}";
                         default:
-                            throw new ArgumentOutOfRangeException(nameof(scalarType.Type), scalarType.Type, null);
+                            throw new GeneratorNotSupportedException($"Scalar type '{scalarType.Type}' is not supported.");
                     }
                 default:
                     return base.ResolveDtoName(type, withNullable);
@@ -91,7 +108,7 @@ namespace Generator.DotNetCore.Helpers
             {
                 if (!Enum.TryParse<GraphQlKind>(kindValue, true, out var kind))
                 {
-                    throw new InvalidEnumArgumentException();
+                    throw new GeneratorNotSupportedException($"Kind '{kindValue}' is not supported.");
                 }
 
                 if (type.Kind == kind)
@@ -118,9 +135,9 @@ namespace Generator.DotNetCore.Helpers
                 case GraphQlKind.Union:
                     return generatedName;
                 case GraphQlKind.NonNull:
-                    throw new InvalidOperationException("Non null can not be processed.");
+                    throw new GeneratorInvalidOperationException("Non null can not be processed.");
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(type.Kind), type.Kind, null);
+                    throw new GeneratorNotSupportedException($"Kind '{type.Kind:G}' is not supported.");
             }
         }
 

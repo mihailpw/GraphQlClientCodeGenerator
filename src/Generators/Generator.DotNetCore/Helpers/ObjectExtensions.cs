@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using GQLCCG.Infra.Exceptions;
 
 namespace Generator.DotNetCore.Helpers
 {
@@ -9,11 +10,11 @@ namespace Generator.DotNetCore.Helpers
         {
             if (arguments.Length != 1)
             {
-                throw new InvalidOperationException("Should be 1 argument.");
+                throw new GeneratorInvalidOperationException("Should be 1 argument.");
             }
             if (!(arguments[0] is T value))
             {
-                throw new InvalidOperationException($"Should be {typeof(T).Name} object.");
+                throw new GeneratorInvalidOperationException($"Should be {typeof(T).Name} object.");
             }
 
             return value;
@@ -28,7 +29,7 @@ namespace Generator.DotNetCore.Helpers
             {
                 if (first != null)
                 {
-                    throw new InvalidOperationException($"First parameter should be {typeof(TFirst).Name} object.");
+                    throw new GeneratorInvalidOperationException($"First parameter should be {typeof(TFirst).Name} object.");
                 }
 
                 firstValue = default(TFirst);
@@ -38,7 +39,7 @@ namespace Generator.DotNetCore.Helpers
             {
                 if (second != null)
                 {
-                    throw new InvalidOperationException($"Second parameter should be {typeof(TSecond).Name} object.");
+                    throw new GeneratorInvalidOperationException($"Second parameter should be {typeof(TSecond).Name} object.");
                 }
 
                 secondValue = default(TSecond);
@@ -51,11 +52,11 @@ namespace Generator.DotNetCore.Helpers
         {
             if (arguments.Length < 1)
             {
-                throw new InvalidOperationException("Should be at list 1 arguments.");
+                throw new GeneratorInvalidOperationException("Should be at list 1 arguments.");
             }
             if (!(arguments[0] is TFirst firstValue))
             {
-                throw new InvalidOperationException($"First parameter should be {typeof(TFirst).Name} object.");
+                throw new GeneratorInvalidOperationException($"First parameter should be {typeof(TFirst).Name} object.");
             }
 
             var array = arguments.Skip(1).Cast<TSecond>().ToArray();

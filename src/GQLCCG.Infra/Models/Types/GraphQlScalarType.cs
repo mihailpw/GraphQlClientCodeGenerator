@@ -20,5 +20,13 @@
         Seconds,
         Milliseconds,
         Decimal,
+        Uri,
+        Guid,
+        Short,
+        UShort,
+        UInt,
+        ULong,
+        Byte,
+        SByte,
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using GQLCCG.Infra.Exceptions;
 using GQLCCG.Infra.Models;
 using GQLCCG.Infra.Models.Objects;
 using GQLCCG.Infra.Models.Types;
@@ -22,9 +23,9 @@ namespace GQLCCG.Processor.SchemaReaders
 
             var objects = types
                 .Where(t => t.GetType() != typeof(GraphQlScalarType)
-                            && t.Name != queryType?.Name
-                            && t.Name != mutationType?.Name
-                            && t.Name != subscriptionType?.Name)
+                    && t.Name != queryType?.Name
+                    && t.Name != mutationType?.Name
+                    && t.Name != subscriptionType?.Name)
                 .ToList();
 
             return new GraphQlSchema(queryType, mutationType, subscriptionType, objects);
@@ -131,13 +132,19 @@ namespace GQLCCG.Processor.SchemaReaders
                 switch (type.Kind)
                 {
                     case "SCALAR":
-                        var scalarType = (ScalarTypes) Enum.Parse(typeof(ScalarTypes), type.Name, true);
-                        yield return new GraphQlScalarType
+                        if (Enum.TryParse<ScalarTypes>(type.Name, true, out var scalarType))
                         {
-                            Name = type.Name,
-                            Description = type.Description,
-                            Type = scalarType,
-                        };
+                            yield return new GraphQlScalarType
+                            {
+                                Name = type.Name,
+                                Description = type.Description,
+                                Type = scalarType,
+                            };
+                        }
+                        else
+                        {
+                            throw new GeneratorNotSupportedException($"Scalar type '{type.Name}' is not supported.");
+                        }
                         break;
                     case "OBJECT":
                         yield return new GraphQlObjectType
@@ -183,9 +190,9 @@ namespace GQLCCG.Processor.SchemaReaders
                         break;
                     case "LIST":
                     case "NON_NULL":
-                        throw new InvalidOperationException($"Kind '{type.Kind}' is not allowed here.");
+                        throw new GeneratorInvalidOperationException($"Kind '{type.Kind}' is not allowed here.");
                     default:
-                        throw new ArgumentOutOfRangeException(nameof(type.Kind), type.Kind, null);
+                        throw new GeneratorNotSupportedException($"Kind '{type.Kind}' is not supported.");
                 }
             }
         }
@@ -211,9 +218,9 @@ namespace GQLCCG.Processor.SchemaReaders
                         switch (lockupType)
                         {
                             case null:
-                                throw new InvalidOperationException($"Ref '{typeRef.Name}' not found.");
+                                throw new GeneratorInvalidOperationException($"Ref '{typeRef.Name}' not found.");
                             case TypeRef _:
-                                throw new InvalidOperationException($"Something gone wrong. {nameof(TypeRef)} could not be here.");
+                                throw new GeneratorInvalidOperationException($"Something gone wrong. {nameof(TypeRef)} could not be here.");
                             default:
                                 return lockupType;
                         }
@@ -258,7 +265,7 @@ namespace GQLCCG.Processor.SchemaReaders
                         break;
                     case GraphQlListType _:
                     case GraphQlNonNullType _:
-                        throw new InvalidOperationException($"Type '{type.GetType().Name}' is not allowed here.");
+                        throw new GeneratorNotSupportedException($"Type '{type.GetType().Name}' is not allowed here.");
                 }
             }
         }

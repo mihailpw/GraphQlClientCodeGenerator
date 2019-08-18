@@ -2,6 +2,7 @@
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+using GQLCCG.Infra.Exceptions;
 
 namespace Generator.DotNetCore.Infra
 {
@@ -26,7 +27,7 @@ namespace Generator.DotNetCore.Infra
             {
                 if (stream == null)
                 {
-                    throw new InvalidOperationException(
+                    throw new GeneratorInvalidOperationException(
                         $"Resource '{path}' not found in assembly {_assembly.FullName}");
                 }
 

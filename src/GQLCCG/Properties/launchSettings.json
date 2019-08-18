@@ -1,8 +1,7 @@
 {
   "profiles": {
     "GQLCCG": {
-      "commandName": "Project",
-      "commandLineArgs": "--config-create"
+      "commandName": "Project"
     }
   }
 }

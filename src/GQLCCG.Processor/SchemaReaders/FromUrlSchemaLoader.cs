@@ -2,6 +2,7 @@
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using GQLCCG.Infra.Exceptions;
 using GQLCCG.Infra.Models;
 using GQLCCG.Infra.Utils;
 using Newtonsoft.Json;
@@ -33,7 +34,7 @@ namespace GQLCCG.Processor.SchemaReaders
                         : "<null>";
                     if (!response.IsSuccessStatusCode)
                     {
-                        throw new InvalidOperationException(
+                        throw new GeneratorInvalidOperationException(
                             $"Status code: {response.StatusCode:D} ({response.StatusCode:G}); content: {content}");
                     }
 
@@ -50,7 +51,7 @@ namespace GQLCCG.Processor.SchemaReaders
                     }
                     catch (JsonReaderException e)
                     {
-                        throw new JsonReaderException("Invalid schema json received.", e);
+                        throw new GeneratorReaderException("Invalid schema json received.", e);
                     }
                 }
             }

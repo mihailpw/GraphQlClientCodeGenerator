@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Generator.DotNetCore;
 using GQLCCG.Configuration;
 using GQLCCG.Infra;
+using GQLCCG.Infra.Exceptions;
 using GQLCCG.Processor;
 using GQLCCG.Processor.GeneratorStores;
 using GQLCCG.Processor.GeneratorWriters;
@@ -26,7 +27,7 @@ namespace GQLCCG
                 var resultMessage = string.Join(
                     Environment.NewLine,
                     new[] { "wrong config file provided.", "Config file errors:" }.Concat(configErrors));
-                throw new InvalidOperationException(resultMessage);
+                throw new GeneratorInvalidOperationException(resultMessage);
             }
 
             var storage = new FromAssembliesGeneratorStore(new []
@@ -58,7 +59,7 @@ namespace GQLCCG
             switch (factories.Count)
             {
                 case 0:
-                    throw new InvalidOperationException("Output target not provided.");
+                    throw new GeneratorInvalidOperationException("Output target not provided.");
                 case 1:
                     return factories.First();
                 default:

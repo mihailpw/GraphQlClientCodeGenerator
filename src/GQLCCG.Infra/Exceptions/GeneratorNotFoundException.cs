@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using GQLCCG.Infra.Exceptions;
 
-namespace GQLCCG.Processor.GeneratorStores
+namespace GQLCCG.Infra.Exceptions
 {
     public class GeneratorNotFoundException : GeneratorExceptionBase
     {

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Generator.DotNetCore.Helpers;
 using GQLCCG.Infra;
+using GQLCCG.Infra.Exceptions;
 using GQLCCG.Infra.Models.Types;
 using HandlebarsDotNet;
 
@@ -46,7 +47,7 @@ namespace Generator.DotNetCore.Infra
                 }
                 else
                 {
-                    throw new NotSupportedException();
+                    throw new GeneratorNotSupportedException($"Auto wire method with return type '{methodInfo.ReturnType.Name}' is not supported.");
                 }
             }
 
